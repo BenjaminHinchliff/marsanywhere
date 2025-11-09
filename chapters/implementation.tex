@@ -1,0 +1,105 @@
+\chapter{Implementation} \label{sec:implementation}
+
+Since no existing suitable datasets existed prior to this work, we first create
+a dataset for use on this problem.
+
+\section{Data Sources}
+
+% \begin{itemize}
+%   \item Satellite - JEZ GeoTiff from Mars Trek
+%   \item DEM - JEZ Geotiff from HiRISE release \url{https://www.uahirise.org/ESP_059352_1985}
+%   \item Ground Imagery - PDS data node beta archive explorer \url{https://pds-imaging.jpl.nasa.gov/beta/archive-explorer}
+% \end{itemize}
+
+Data was all sourced from publicly available NASA resources.
+
+The Ground imagery was collected from NASA Jet Propulsion Labratory's Planetary
+Data Systems data node, filtered for cylindrically projected mosaic panoramic
+images released from the perseverance rover \cite{PDS_IMG_Node_Mars2020}.
+
+The satellite views were sourced from processed GeoTIFF map data released by
+NASA as part of the planning for landing the perseverance rover in the Jezero
+crater region. This data was initially collected from the GeoTIFF released as a
+part of the Mars Trek application \cite{MarsTrek_Law2017}, but was later swapped
+to use data from the slightly less comprehensive Jezero crater region HiRISE
+data release for consistency with the DEM data.
+
+The DEM data was sourced from the HiRISE data release done by the USGS
+\cite{USGS_Mars2020_TRN_HiRISE_2020}. 
+
+\section{Data Processing Pipeline}
+
+\subsection{Ground Imagery}
+
+% \begin{itemize}
+%   \item VICAR Images
+%   \item Normalization
+%   \item Gamma correction
+%   \item Reprojection
+%   \item Resizing
+% \end{itemize}
+
+The Perseverance ground imagery's native form is in VICAR format, and so imagery
+was opened using a patched version rms-vicar, a python-based VICAR file reader
+maintrained by SETI \cite{hinchliff2025rms‐vicar}. While PNG releases of
+converted images are also done, VICAR was chosen as the imagery sounce since the
+specifics of the imagery conversion and if any data is lost is unknown to us.
+
+Since imagery contained absolute intensity instead of sRGB image data, it was
+first normalized and then gamma corrected ($\gamma = 2.2$), for usage as
+standard 24-bit PNG image data.
+
+The associated PDS label data in the VICAR images was extracted and stored in a
+metadata csv file, for later usage in processing the satellite imagery.
+
+Since the mosaic imagery often had different extents (sometimes being only a
+small portion of a much larger image), it needs to be reporjected to a standard
+panoramic form for usage in machine learning. This was done using a Python and
+OpenCV to build a remap operation to shift the view and height to approximate a
+uniform perspective for the imagery. (maybe go into laborious detail on this?)
+
+Lastly, the images were resized to be 1024x512, an arbitrary size comparable to
+other works done in the field.
+
+\subsection{Satellite Imagery}
+
+% \begin{itemize}
+%   \item HiRISE Geotiff
+%   \item SPICE localization lookup
+%   \item GDAL tile cropping
+%   \item Blender ground view reprojection
+% \end{itemize}
+
+The ground imagery does not contain localization information trivially
+convertible to latitude and longitude. Position information is given in a
+mars-fixed Cartesian frame relative to a recursively defined "site frame", where 
+the first site frame is defined relative to the rover landing location and the
+second site frame is defined relative to the first, etc.
+
+We sidestep this complexity by instead locating the rover based on the time the
+image was assembled into a mosaic panorama and looking up it's position in
+public releases of rover localizations. In our work, we used publicly available
+SPICE data to do this \cite{mars2020_spice_kernels_2025}. We may have been able
+to use the simpler PLACES database, but is has a lower temporal resolution of
+only one position per day and no inbuilt interpolation. Using python and
+Spiceypy, we looked up the latitude and longitude of the Perseverance rover at a
+given time when a mosaic image was assembled \cite{SpiceyPy_Annex2020}. Since
+most mosaics are assembled while the rover is still at the location of the
+mosaic images, this provides a good heuristic for the rover's approximate
+location.
+
+For each located image, a 0.005\textdegree{} diameter tile of satellite image and DEM
+data was extracted from the full data release using Python and GDAL
+\cite{USGS_Mars2020_TRN_HiRISE_2020, GDAL_2025}. This comes out to a 1124 by 1186
+tile of the satellite image data at 25 cm/pixel, and a 296 by 296 tile of the
+DEM image data at 1 m/pixel. This makes the absolute extent of each tile just
+under 300 m diameter.
+
+
+\subsection{HuggingFace Dataset Conversion}
+
+\section{ControlNet Model}
+
+\subsection{Associative Masking}
+
+

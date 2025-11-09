@@ -1,9 +1,7 @@
 \chapter{Background} \label{sec:background}
 
 Our work builds on a variety of prior work both by NASA in relation to the Mars
-data used, and on exsiting cross-view pipelines on earth. However, due to large
-differences in the available data, most existing pipelines are not a drop-in
-solution.
+data used, and on exsiting cross-view pipelines on earth.
 
 \section{The Perseverance (M2020) Rover}
 
@@ -29,8 +27,32 @@ for usage in this work.
 
 \section{HiRISE}
 
-
+The High Resolution Imaging Science Experiment, aka HiRISE mission, is a mission
+focused on high resolution imaging of places of interest on the martian surface.
+Initally launched in 2005, the orbiter arrived at Mars in 2006, where it has
+been operaating ever since (long since exceeding its initial (prime) mission
+length of 2 years) \cite{HiRISE_McEwen2007}. All orbital imagery used in this
+work was aquired from imagery captured by the HiRISE orbiter, later processed
+and released as part of the Mars Trek application  \cite{MarsTrek_Law2017}.
 
 \section{Diffusion Models}
 
+Diffusion models create a model that is trained to denoise images by
+artificially adding progressively worse noise during training. After training,
+random noise can be fed into the model and the model will progressively remove
+the noise and in the process effectively "hallucinate" an image that aligns with
+its training data. This process can be guided towards specific outcomes using a
+process called conditioning in the form of mechanisms like cross-attention that
+"teach" the network to focus on specific values \cite{Diffusion_Ho2020}.
+
+In the context of cross-view synthesis, a more complex version of the technique
+called latent diffusion (which operates on the latent space) is used
+\cite{LatentDiffusion_Rombach2022}.
+
 \section{ControlNet}
+
+ControlNets are a technique to allow for effective modification of an already
+pretrained model to allow for the specilization of an existing foundation model
+to a new application [EXPAND] \cite{ControlNet_Zhang2023}.
+
+\section{GeoTIFF}

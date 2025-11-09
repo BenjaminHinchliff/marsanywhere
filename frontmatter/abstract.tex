@@ -1,1 +1,16 @@
-Recent advancements in generative machine learning have allowed for
+Satellite-to-ground view synthesis aims to create a realistic ground view image
+from a corresponding satellite view image. This is a well-studied problem for
+street level imagery, with good results being achieved by using modern image
+synthesis techniques such as diffusion models. However, despite the public
+availability of satellite and ground level imagery on Mars, these techniques
+have yet to be applied to the domain due to difficulties in collating and
+processing the data into a usable form. We address this deficiency by creating a
+dataset consisting of ground view panorama imagery from the Perseverance rover,
+along with associated satellite view imagery and DEM data from HiRISE collected
+for Perseverance mission planning. We then apply a controlnet on stable
+diffusion 2.1 to the image data projected into the rover view. We also apply
+loss masking based on the conditioning image to help the model build
+associations between the project view and the target imagery. We compare these
+results on standard image reconstruction metrics. Our work lays the foundation
+for future developments in the area, targeting applications to education and
+rover planning.
