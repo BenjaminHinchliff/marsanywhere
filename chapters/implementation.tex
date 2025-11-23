@@ -25,7 +25,7 @@ to use data from the slightly less comprehensive Jezero crater region HiRISE
 data release for consistency with the DEM data.
 
 The DEM data was sourced from the HiRISE data release done by the USGS
-\cite{USGS_Mars2020_TRN_HiRISE_2020}. 
+\cite{USGS_Mars2020_TRN_HiRISE_2020}.
 
 \section{Data Processing Pipeline}
 
@@ -72,7 +72,7 @@ other works done in the field.
 
 The ground imagery does not contain localization information trivially
 convertible to latitude and longitude. Position information is given in a
-mars-fixed Cartesian frame relative to a recursively defined "site frame", where 
+mars-fixed Cartesian frame relative to a recursively defined "site frame", where
 the first site frame is defined relative to the rover landing location and the
 second site frame is defined relative to the first, etc.
 
@@ -88,18 +88,130 @@ most mosaics are assembled while the rover is still at the location of the
 mosaic images, this provides a good heuristic for the rover's approximate
 location.
 
-For each located image, a 0.005\textdegree{} diameter tile of satellite image and DEM
-data was extracted from the full data release using Python and GDAL
-\cite{USGS_Mars2020_TRN_HiRISE_2020, GDAL_2025}. This comes out to a 1124 by 1186
-tile of the satellite image data at 25 cm/pixel, and a 296 by 296 tile of the
-DEM image data at 1 m/pixel. This makes the absolute extent of each tile just
-under 300 m diameter.
+For each located image, a 0.005\textdegree{} diameter tile of satellite image
+and DEM data was extracted from the full data release using Python and GDAL
+\cite{USGS_Mars2020_TRN_HiRISE_2020, GDAL_2025}. This comes out to a 1124 by
+1186 tile of the satellite image data at 25 cm/pixel, and a 296 by 296 tile of
+the DEM image data at 1 m/pixel. This makes the absolute extent of each tile
+just under 300 m diameter.
 
+\section{Ground View Reprojection}
+
+Preliminary testing found that a Controlnet based model performed poorly on
+sattelite/dem imagery alone. We believe this is likely because the U-Net
+architecture used by Stable Diffusion 2.1 struggles to encode the quite complex
+non-linear perspective shifts in the data, and as such stuggles to converge into
+a useful result. This is consistent with the work of
+\citeauthor{li2024crossviewdiff}, where they chose to use a ground view sky mask
+to guide the diffusion process \cite{li2024crossviewdiff}. We do not have access
+to sky mask data, and don't want to use it as a prior, so chose to instead use a
+conceptually similar approach of reprojecting the sattelite view tiles into the
+ground view space to make the persepctive shift minimal.
+
+This was done using Blender, an open source 3d graphics suite that includes a
+robust scripting API \cite{blender2025}. The sattelite view was projected onto a
+plane of size 2.0 units. The plane was then subdivided in accordance with the
+resolution of the ground DEM texture, and then the DEM texture was applied as a
+displacement modifier to the plane. The plane was then offset by the scaled
+height of the displacement height under the camera (the center of the texture),
+such that the displaced plane would remain fixed near the scene origin. From
+empirical testing, we found that a displacement strength of 0.1 and a camera height of 0.25 units produced resulsts reasonably consistent with the ground view imagery.
+
+\begin{figure}
+\begin{tikzpicture}[
+  io/.style={
+    draw=black
+  },
+  stage/.style={
+    draw=black,
+    minimum height=0.5\linewidth,
+    minimum width=0.2\linewidth
+  },
+  descr/.style={
+    fill=white,
+    inner sep=2.5pt
+  }
+]
+
+  \node [stage] (gdal) {
+    \begin{minipage}{1.5cm} % adjust width for your layout
+        \centering
+        \rotatebox{270}{GDAL Tile Extraction}\\[2pt]
+        \includegraphics[width=\linewidth]{gdalicon.png}
+    \end{minipage}
+  };
+
+  \node [io, above left=-3.4cm and 1cm of gdal] (rgbfull) {
+    \includegraphics[height=0.18\linewidth]{JEZ_hirise_soc_007_orthoMosaic_25cm_Ortho_blend120_thumb.png}
+  };
+
+  \node [io, below=of rgbfull] (dtmfull) {
+    \includegraphics[height=0.18\linewidth]{JEZ_hirise_soc_006_DTM_MOLAtopography_DeltaGeoid_1m_Eqc_latTs0_lon0_blend40_thumb.png}
+  };
+
+  \node [io, above right=-3.4cm and 1cm of gdal] (rgbtile) {
+    \includegraphics[height=0.18\linewidth]{N_LRGB_1252_RZS_0590000_CYL_L_AUTOGENJ03_sat.png}
+  };
+
+  \node [io, below=of rgbtile] (dtmtile) {
+    \includegraphics[height=0.18\linewidth]{N_LRGB_1252_RZS_0590000_CYL_L_AUTOGENJ03_dem.png}
+  };
+
+  \node [io, above=of gdal] (ground) {
+    \includegraphics[height=0.18\linewidth]{N_LRGB_1252_RZS_0590000_CYL_L_AUTOGENJ03.png}
+  };
+
+  \node [stage, below right=-3.4cm and 1cm of rgbtile] (blender) {
+    \begin{minipage}{1.5cm} % adjust width for your layout
+        \centering
+        \rotatebox{270}{Blender Reprojection}\\[2pt]
+        \includegraphics[width=\linewidth]{blender_icon_128x128.png}
+    \end{minipage}
+  };
+
+  \node [io, below left=1cm and -3cm of blender] (vis) {
+    \includegraphics[height=0.18\linewidth]{N_LRGB_1252_RZS_0590000_CYL_L_AUTOGENJ03_vis.png}
+  };
+
+  \draw[-stealth] (ground.south) to node[descr] {Rover Mosaic Creation Time} (gdal.north);
+  \draw[-stealth] (rgbfull.east) |- ([yshift=2cm]gdal.west);
+  \draw[-stealth] (dtmfull.east) |- ([yshift=-2.25cm]gdal.west);
+  \draw[-stealth] ([yshift=2cm]gdal.east) |- (rgbtile.west);
+  \draw[-stealth] ([yshift=-2.25cm]gdal.east) |- (dtmtile.west);
+  \draw[-stealth] (rgbtile.east) |- ([yshift=2cm]blender.west);
+  \draw[-stealth] (dtmtile.east) |- ([yshift=-2.25cm]blender.west);
+  \draw[-stealth] (blender.south) -- ++(0,-0.5) -| (vis.north);
+
+\end{tikzpicture}
+
+\caption{Data Processing Pipeline}
+\label{fig:data-pipeline}
+
+\end{figure}
 
 \subsection{HuggingFace Dataset Conversion}
 
+For compatibility with the HuggingFace datasets library, a script was created to
+allow for a custom loading of the dataset. This was first written using the
+HuggingFace datasets api and python library for a custom scripted dataset, but
+with the depreciation of custom scipts (for security reasons) in huggingface
+datasets v4.0.0, the script was updated to use the imagefolder dataset loader.
+
+This provides additional benefits in that the train and test partitions are
+simple directories, allowing them to be more easily used for other problems such
+as for calculating results.
+
+\subsection{Train Test Split}
+
+
+
 \section{ControlNet Model}
+
+A controlnet model based on Stable Diffusion 2.1 was trained on the projected
+ground view imagery.
 
 \subsection{Associative Masking}
 
-
+A factor of additional complexity with the training set is that the ground
+imagery necessarily contains more data than the tile, much less the reprojected
+tile, can provide.
