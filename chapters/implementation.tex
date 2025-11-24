@@ -203,12 +203,17 @@ as for calculating results.
 
 \subsection{Train Test Split}
 
-
+The dataset was split into two partitions, a train split and the holdout test split using a simple random sampling, with 80\% train split and 20\% test split.
 
 \section{ControlNet Model}
 
 A controlnet model based on Stable Diffusion 2.1 was trained on the projected
-ground view imagery.
+ground view imagery. This was trained using a script originally created to fine
+tune stable diffusion 2.1 models, and was subsequently modified to automatically
+split and optionally appropriately mask the train images. The model was trained
+on the dataset with a learning rate of $lr = 10^{-5}$ for 2000 epochs on 2x
+NVIDIA V100 GPU. To converve memory and allow for faster train, 16-bit floats
+were used for the model.
 
 \subsection{Associative Masking}
 
