@@ -1,16 +1,55 @@
 \chapter{Results} \label{sec:results}
 
+We evaluate our model on metrics inherited from past cross view diffusion work, namely \citeauthor{li2024crossviewdiff} \cite{li2024crossviewdiff}.
+
 \section{Metrics}
+
+Note that for the formulation of these metrics we assume image data is a matrix of float data in the range [0.0, 1.0], inclusive.
 
 \subsection{Sharpness Difference}
 
+Sharpness Difference (SD) quantifies the difference between the gradients of the predicted and initial images. Simply put, it measures the loss of sharpness in an image.
+
+This is calculated as the difference between the sum of the horizontal and vertical gradients as calculated via simple difference as follows:
+
+\begin{equation}
+    \SD(I_g, I'_g) = 10 \log_{10} \frac{1}{\GS(I_g, I'_g)}
+\end{equation}
+
+where
+
+\begin{equation}
+    \GS(I_g, I'_g) = \frac{1}{m n} \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \left| (\nabla_i I_g + \nabla_j I_g) - (\nabla_i I'_g + \nabla_j I'_g) \right|
+\end{equation}
+
+and
+
+\begin{align*}
+    \nabla_i I &= \left| I_{i,j} - I_{i-1,j} \right| \\
+    \nabla_j I &= \left| I_{i,j} - I_{i,j-1} \right|
+\end{align*}
+
+We make a minor modification to this formulation, using central difference as opposed to simple difference, but don't believe this should significantly affect the results.
+
 \subsection{Peak Signal to Noise Ratio}
+
+Peak Signal to Noise Ratio (PSNR) is a simple and ubiquitous metric to measure image quality loss. Intuitively, it can be described as the ratio between the true image and the noise (errors) present in the "reconstructed" (synthesized) images. Formally, this is expressed as follows:
+
+\begin{equation}
+    \mathrm{PSNR}(I_g, I'_g) = 10 \log_{10} \frac{1}{\mathrm{MSE(I_g, I'_g)}}
+\end{equation}
+
+where
+
+\begin{equation}
+    \mathrm{MSE}(I_g, I'_g) = \frac{1}{m n} \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \left( I_{i, j} - I'_{i, j} \right)^2
+\end{equation}
 
 \subsection{Structural Similarity}
 
 \subsection{Fréchet Inception Distance}
 
-
+\subsection{Kernel Inception Distance}
 
 \begin{table}
 

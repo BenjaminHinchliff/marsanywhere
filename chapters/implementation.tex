@@ -1,7 +1,7 @@
 \chapter{Implementation} \label{sec:implementation}
 
 Since no existing suitable datasets existed prior to this work, we first create
-a dataset for use on this problem.
+a dataset for use on this problem. We then create a controlnet-based model for usage on the dataset.
 
 \section{Data Sources}
 
@@ -52,11 +52,55 @@ standard 24-bit PNG image data.
 The associated PDS label data in the VICAR images was extracted and stored in a
 metadata csv file, for later usage in processing the satellite imagery.
 
-Since the mosaic imagery often had different extents (sometimes being only a
-small portion of a much larger image), it needs to be reporjected to a standard
-panoramic form for usage in machine learning. This was done using a Python and
-OpenCV to build a remap operation to shift the view and height to approximate a
-uniform perspective for the imagery. (maybe go into laborious detail on this?)
+Since the mosaic imagery often had different extents and orientations (sometimes
+being only a small portion of a much larger image), it needs to be reprojected
+to a standard panoramic form for usage in machine learning.
+
+This was done using a Python and OpenCV to build a remap operation to shift the
+view and height to approximate a uniform perspective for the imagery, using the following formula:
+
+\begin{align}
+    R_j &= \frac{S_j - \theta_{\text{min}}}{\theta_{\text{max}} - \theta_{\text{min}}} n \\
+    R_i &= \frac{S_i - \tan \phi_{\text{min}}}{\tan \phi_{\text{max}} - \tan \phi_{\text{min}}} m
+\end{align}
+
+\begin{figure}
+\begin{tikzpicture}[
+  io/.style={
+    draw=black
+  },
+  stage/.style={
+    draw=black
+  },
+  descr/.style={
+    fill=white,
+    inner sep=2.5pt
+  }
+]
+  \node [io] (raw) {
+    \includegraphics[height=0.18\linewidth]{N_LRGB_0124_RZS_0041678_CYL_L_AUTOGENJ03_raw.jpg}
+  };
+
+  \node [stage, right=of raw] (reproj) {
+    \begin{minipage}{3cm} % adjust width for your layout
+        \centering
+        \includegraphics[width=\linewidth]{reproj-icon.jpg} \\
+        Reprojection
+    \end{minipage}
+  };
+
+  \node [io, right=of reproj] (projed) {
+    \includegraphics[height=0.18\linewidth]{N_LRGB_0124_RZS_0041678_CYL_L_AUTOGENJ03_proj.jpg}
+  };
+
+  \draw[-stealth] (raw.east) |- (reproj.west);
+  \draw[-stealth] (reproj.east) |- (projed.west);
+\end{tikzpicture}
+
+\caption{Ground processing pipeline reprojection example, showing a ground image reprojected into a standardized cylinder.}
+\label{fig:ground-pipeline}
+
+\end{figure}
 
 Lastly, the images were resized to be 1024x512, an arbitrary size comparable to
 other works done in the field.
@@ -116,6 +160,8 @@ displacement modifier to the plane. The plane was then offset by the scaled
 height of the displacement height under the camera (the center of the texture),
 such that the displaced plane would remain fixed near the scene origin. From
 empirical testing, we found that a displacement strength of 0.1 and a camera height of 0.25 units produced resulsts reasonably consistent with the ground view imagery.
+
+The full data processing pipeline is visualized in figure~\ref{fig:data-pipeline}.
 
 \begin{figure}
 \begin{tikzpicture}[
@@ -212,11 +258,47 @@ ground view imagery. This was trained using a script originally created to fine
 tune stable diffusion 2.1 models, and was subsequently modified to automatically
 split and optionally appropriately mask the train images. The model was trained
 on the dataset with a learning rate of $lr = 10^{-5}$ for 2000 epochs on 2x
-NVIDIA V100 GPU. To converve memory and allow for faster train, 16-bit floats
+NVIDIA V100 GPU. To conserve memory and allow for faster train, 16-bit floats
 were used for the model.
 
-\subsection{Associative Masking}
+\subsection{Loss Function Ground Truth Masking}
 
-A factor of additional complexity with the training set is that the ground
-imagery necessarily contains more data than the tile, much less the reprojected
-tile, can provide.
+A factor that adds additional complexity is that panoramic mosaics that serve as
+ground truth imagery can have missing data, and in fact do in almost all cases.
+For instance, in figure~\ref{fig:missing-data}, the blacked out regions indicate
+a lack of data, not true colors of the image. This is obvious to our eyes, but
+less so to a machine learning model, leading it to reproduce these artifacts in
+its output. This is undesirable, and so we compensate for it by masking the
+predicted image such that the model loss is only computed between the section of
+imagery that is truly present in the imagery. This is done by shareholding for
+non-black pixels to create a ground image mask. This mask is the applied to the
+predicted imagery, and the loss is then subsequently calculated between the
+imagery as per normal, as shown in figure~\ref{fig:gt-masking-ex}.
+
+\begin{figure}
+\includegraphics[width=\linewidth]{N_LRGB_1252_RZS_0590000_CYL_L_AUTOGENJ03.png}
+
+\caption{Example ground imagery panorama mosaic after reprojection. Blacked out regions indicate areas where the panorama is missing data.}
+\label{fig:missing-data}
+\end{figure}
+
+\begin{figure}
+
+\includegraphics[width=\linewidth]{ground-mask-ex.jpg}
+
+\caption{Example pipeline for ground truth masking the loss, with MSE loss as an example.}
+\label{fig:gt-masking-ex}
+
+\end{figure}
+
+\subsection{Mutual Information Masking}
+
+Additional experiments were conducted with masking loss function on the intersection between the data present in both the conditioning image and the true ground imagery. We refer to this as mutual information masking since we are masking to only train the model on the mutually included information between the views. This was done by taking the bitwise and of a mask of both the ground and prior imagery, then applying that to the predicted imagery and the ground imagery for loss calculation, as shown in figure~\ref{fig:mi-masking-ex}.
+
+\begin{figure}
+
+\includegraphics[width=\linewidth]{full-mask-ex.jpg}
+\caption{Example pipeline for mutual information masking the loss, with MSE loss as an example.}
+\label{fig:mi-masking-ex}
+
+\end{figure}

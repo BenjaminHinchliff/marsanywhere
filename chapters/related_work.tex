@@ -32,3 +32,23 @@ trees, which helps improve model performance \cite{zhai2017groundlayout, tang201
 
 Another common avenue of research is to focus on various reprojection techniques, such as projecting to a birds eye view \cite{ye2025bev}, or polar
 transformation \cite{toker2021dte}. Another notable example is differentiable reprojection techniques such as in the work of \citeauthor{shi2022geopanoramasynth} where a learnable reprojection module is used to relate the satellite and ground views \cite{shi2022geopanoramasynth}.
+
+\section{Diffusion Models}
+
+Diffusion models create a model that is trained to denoise images by
+artificially adding progressively worse noise during training. After training,
+random noise can be fed into the model and the model will progressively remove
+the noise and in the process effectively "hallucinate" an image that aligns with
+its training data. This process can be guided towards specific outcomes using a
+process called conditioning in the form of mechanisms like cross-attention that
+"teach" the network to focus on specific values \cite{Diffusion_Ho2020}.
+
+In the context of cross-view synthesis, a more complex version of the technique
+called latent diffusion (which operates on the latent space) is used
+\cite{LatentDiffusion_Rombach2022}.
+
+\section{ControlNet}
+
+ControlNets are a technique to allow for effective modification of an already
+pretrained model to allow for the specilization of an existing foundation model
+to a new application [EXPAND] \cite{ControlNet_Zhang2023}.
