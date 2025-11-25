@@ -1,8 +1,34 @@
 \chapter{Related Work} \label{sec:related_work}
 
-\section{SkyDiffusion}
+\section{Aerial Ground Co-location/Geolocation}
 
-\section{CrossViewDiff}
+A closely related field of research is that of cross view geo-localization,
+specifically, aerial ground co-location, which consists of localizing ground
+imagery based on corresponding aerial imagery. This has extensive application
+varying from self-driving cars to robotics.
 
+The state of the art consists of many different approaches varying from
+traditional feature matching techniques \cite{castaldo2015featurematching} to
+ground to aerial synthesis with feature matching \cite{regmi2019g2amatching}.
 
+Notable to this work, similar techniques have also been applied on mars with the
+roll out of Global Localization techniques for Perseverance rover operation,
+utilizing the aerial view projected orthomoasics and template matching
+\cite{verma2024globalloco}.
 
+\section{Satellite-to-street View Synthesis}
+
+Satellite to street view synthesis for Earth imagery is a well-studied problem,
+with a focus on applications to urban areas, as these tend to be the most
+difficult. With sufficiently large dataset, direct image to image translation
+can produce decent results, however on earth the additional complexity of the
+imagery can create a number of issues. For example, if the model lacks an
+understanding of the different types of structures in the imagery, it can
+misidentify them and then subsequently mispredict them in the imagery. For
+example, misunderstanding a helipad as a road or the like. To help mitigate
+these issues, it's common to introduce additional semantic information to
+attempt to categorize the different types of terrain, such as grass, road,
+trees, which helps improve model performance \cite{zhai2017groundlayout, tang2019selectiongan}.
+
+Another common avenue of research is to focus on various reprojection techniques, such as projecting to a birds eye view \cite{ye2025bev}, or polar
+transformation \cite{toker2021dte}. Another notable example is differentiable reprojection techniques such as in the work of \citeauthor{shi2022geopanoramasynth} where a learnable reprojection module is used to relate the satellite and ground views \cite{shi2022geopanoramasynth}.

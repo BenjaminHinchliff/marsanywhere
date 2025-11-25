@@ -16,15 +16,56 @@
 
 \begin{tabular}{ l c c c c c }
 \hline
-    & SD $\uparrow$ & PSNR $\uparrow$ & SSIM $\uparrow$ & FID $\downarrow$ & KID $\downarrow$ \\
+    & SD $\uparrow$ & PSNR $\uparrow$ & SSIM $\uparrow$ & FID $\downarrow$ & KID ($\overline{x}$) $\downarrow$ \\
 \hline
-Mean Baseline & 20.41 & 19.38 & 0.6123 & 502.13 & \\
-No Masking & 16.05 & 14.45 & 0.4839 & 232.20 & \\
-Full Masking & 16.09 & 13.12 & 0.3819 & 247.40 & \\
+Mean Baseline & \textbf{20.24} & \textbf{19.10} & \textbf{0.6123} & 475.50 & 0.6320 \\
+Target Masking & 15.88 & 14.19 & 0.4823 & \textbf{168.9} & \textbf{0.1111} \\
+Full Masking & 15.92 & 12.86 & 0.3807 & 228.50 & 0.1728 \\
 \hline
 \end{tabular}
 
-\caption{Mean SD, PSNR, SSIM, FID, and KID across the test set.}
+\caption{Mean SD, PSNR, SSIM, FID, and KID across the test set without any masking.}
+\label{tab:unmasked}
+
+\end{table}
+
+\begin{table}
+
+\begin{tabular}{ l c c c c c }
+\hline
+    & SD $\uparrow$ & PSNR $\uparrow$ & SSIM $\uparrow$ & FID $\downarrow$ & KID ($\overline{x}$) $\downarrow$ \\
+\hline
+Mean Baseline & \textbf{20.53} & \textbf{22.73} & \textbf{0.7883} & 271.10 & 0.2631 \\
+Target Masking & 16.60 & 16.99 & 0.6338 & \textbf{149.10} & \textbf{0.08959} \\
+Full Masking & 16.71 & 15.13 & 0.5540 & 182.80 & 0.1099 \\
+\hline
+\end{tabular}
+
+\caption{
+Mean SD, PSNR, SSIM, FID, and KID across the test set with masking to only data
+present in the true ground imagery.
+}
+\label{tab:gt-masked}
+
+\end{table}
+
+\begin{table}
+
+\begin{tabular}{ l c c c c c }
+\hline
+    & SD $\uparrow$ & PSNR $\uparrow$ & SSIM $\uparrow$ & FID $\downarrow$ & KID ($\overline{x}$) $\downarrow$ \\
+\hline
+Mean Baseline & \textbf{16.76} & \textbf{14.81} & \textbf{0.4377} & 260.30 & 0.2502 \\
+Target Masking & 14.68 & 13.64 & 0.3351 & \textbf{191.60} & 0.1373 \\
+Full Masking & 15.42 & 12.80 & 0.3014 & 203.6 & \textbf{0.1368} \\
+\hline
+\end{tabular}
+
+\caption{
+Mean SD, PSNR, SSIM, FID, and KID across the test set with masking to only data
+present in \textbf{both} the projected conditioning imagery and masked ground imagery.
+}
+\label{tab:cond-masked}
 
 \end{table}
 
