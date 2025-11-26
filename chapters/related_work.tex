@@ -35,20 +35,37 @@ transformation \cite{toker2021dte}. Another notable example is differentiable re
 
 \section{Diffusion Models}
 
-Diffusion models create a model that is trained to denoise images by
-artificially adding progressively worse noise during training. After training,
-random noise can be fed into the model and the model will progressively remove
-the noise and in the process effectively "hallucinate" an image that aligns with
-its training data. This process can be guided towards specific outcomes using a
-process called conditioning in the form of mechanisms like cross-attention that
-"teach" the network to focus on specific values \cite{Diffusion_Ho2020}.
+Diffusion models create a model that is trained to progressively denoise images
+by artificially adding progressively worse noise during training. After
+training, random noise can be fed into the model and the model will
+progressively remove the noise and in the process almost replicate an image that
+aligns with its training data. This process can be conditioned towards specific
+outcomes using conditioning in the form of mechanisms like cross-attention
+\cite{Diffusion_Ho2020}.
 
 In the context of cross-view synthesis, a more complex version of the technique
 called latent diffusion (which operates on the latent space) is used
 \cite{LatentDiffusion_Rombach2022}.
 
+Our work is specifically based upon Stable Diffusion 2.1 \cite{Rombach_2022_CVPR}, a high quality open source U-Net based latent diffusion model.
+
 \section{ControlNet}
 
-ControlNets are a technique to allow for effective modification of an already
-pretrained model to allow for the specilization of an existing foundation model
-to a new application [EXPAND] \cite{ControlNet_Zhang2023}.
+ControlNets are a technique to allow for fine-tuning an existing model to be
+conditioned using new inputs, without permanently modifying the original model
+and with far less compute than training the entire model. This is done by
+creating a trainable copy of the downward convolutional layers in the U-Net
+backbone which are then added back into the model progressively through zero
+convolution layers, as shown in figure~\ref{fig:controlnet-arch} \cite{ControlNet_Zhang2023}.
+
+\begin{figure}
+
+\includegraphics[width=\linewidth]{sd.png}
+
+\caption{Diagram of controlnets showing how a trainable copy is progressively
+added into the U-Net backbone of stable diffusion to allow for model fine-tuning
+without changing the original model \cite{ControlNet_Zhang2023}.}
+
+\label{fig:controlnet-arch}
+
+\end{figure}

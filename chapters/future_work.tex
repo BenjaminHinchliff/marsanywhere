@@ -2,4 +2,24 @@
 
 \section{Incorporating Depth Information}
 
-The Perseverance rover imagery already contains everything necessary to extract depth information
+The Perseverance rover imagery already contains everything necessary to extract depth information, since the Navcam is a stereo camera and stereo pairs are released.
+
+It was not practical for our use-case to extract this information since the
+mosaic images are often not released as stereo pairs, and in the cases where
+they are, the distortion created by the cylindrical reprojection causes very poor quality reconstruction. However, if a custom pipeline were created for building our own mosaic imagery, it would be possible to extract this depth information from the rectified source images. It would subsequently be possible to then include it in the dataset. This could allow for a number of improvements including using them to inform a sky mask, or perhaps improving the viability of volume reconstruction techniques.
+
+\section{Sky Masking}
+
+In cross view synthesis, it is often useful to have sky mask information. For instance, it is used as the primary prior in \citeauthor{li2024crossviewdiff} \cite{li2024crossviewdiff}. As such, having this data in our dataset would be helpful. Unfortunately, due to the relative lack of contrast between the ground and sky in mars imagery, it is difficult to accurately segment the sky using traditional image processing techniques. Future work may want to explore segmentation using neural techniques or informed by depth information.
+
+\section{Rover Masking}
+
+The Perseverance rover is visible in much of the ground truth imagery we aim to synthesize. This is a problem because it leads the model to attempt synthesize the rover rather than focusing on our actual domain of interest. As such, masking out the rover could allow for higher quality and more visually pleasing results. Unfortunately, due to the rovers varying colors and textures, it has thus far been difficult to mask out without the ability to utilize depth information.
+
+\section{Full 3D Reconstruction and Rendering}
+
+With the advent and popularization of NeRFs and 3D Gaussian Splatting, it may be
+possible to approach this problem as a special-case 3D reconstruction/enhancment
+task rather than an image synthesis task. This would allow for the viewing of
+the scene from more angles and may allow for better geometry-aware
+reconstruction.

@@ -1,6 +1,6 @@
 \chapter{Results} \label{sec:results}
 
-We evaluate our model on metrics inherited from past cross view diffusion work, namely \citeauthor{li2024crossviewdiff} \cite{li2024crossviewdiff}.
+We evaluate the trained model on the 20\% test split of the dataset on metrics inherited from past cross view diffusion work, namely Sharpness Difference, PSNR, SSIM, FID, and KID \cite{li2024crossviewdiff}.
 
 \section{Metrics}
 
@@ -8,7 +8,7 @@ Note that for the formulation of these metrics we assume image data is a matrix 
 
 \subsection{Sharpness Difference}
 
-Sharpness Difference (SD) quantifies the difference between the gradients of the predicted and initial images. Simply put, it measures the loss of sharpness in an image.
+Sharpness Difference (SD) quantifies the difference between the gradients of the predicted and initial images. Simply put, it measures the loss of sharpness in an image \cite{mathieu2016bmse}.
 
 This is calculated as the difference between the sum of the horizontal and vertical gradients as calculated via simple difference as follows:
 
@@ -47,20 +47,110 @@ where
 
 \subsection{Structural Similarity}
 
-\subsection{Fréchet Inception Distance}
+Structural similarity is a composite metric that attempts to better quantify how perceptually similar two images are. It consists of three components. The luminance component $l$ attempts to quantify where luminance masking might occur, as in when differences in intensity are less visible due to being in a bright region. The contrast component $c$ does similar for contrast masking, where changes in contrast might be less visible in highly textured regions. Lastly the structural term, $s$, where the standard deviation is used as a vector correlation to compare the structure of the two images \cite{wang2004ssim}.
+
+This leads to the following formulation:
+
+\begin{equation}
+    \mathrm{SSIM}(I, I') = l(I, I')^\alpha \cdot c(I, I')^\beta \cdot s(I, I')^\gamma
+\end{equation}
+
+where
+
+\begin{align}
+    l(I, I') &= \frac{2 \mu_{I} \mu_{I'} + c_1}{\mu_{I}^2 + \mu_{I'}^2 + c_1} \\
+    c(I, I') &= \frac{2 \sigma_{I} \sigma_{I'} + c_2}{\sigma_{I}^2 + \sigma_{I'}^2 + c_2} \\
+    s(I, I') &= \frac{\sigma_{I I'} + c_3}{\sigma_{I} \sigma_{I'} + c_3}
+\end{align}
+
+where
+
+\begin{itemize}
+    \item $\mu_I$ is the pixel sample mean of $I$.
+    \item $\mu_{I'}$ is the pixel sample mean of $I'$.
+    \item $\sigma_{I}^2$ is the sample variance of $I$.
+    \item $\sigma_{I'}^2$ is the sample variance of $I'$.
+    \item $\sigma_{I I'}$ is the sample covariance of $I$ and $I'$.
+    \item $c_1$, $c_2$, and $c_3$ are stabilizing constants calculated as $c_n = (k_n L)^2$, where L is the dynamic range (maximum luminance) of the pixel values.
+\end{itemize}
+
+In our work, we use the special cased version of $\mathrm{SSIM}$, with $k_1 = 0.01$, $k_2 = 0.03$ and $c_3 = c_2 / 2$.
+
+\subsection{Fr\'echet Inception Distance}
+
+Fr\'echet Inception Distance is a model based evaluation metric that compares the multivariate normal distributions estimated by Inception v3 features. The more similar the distributions, the smaller the distance between them, and the lower the metric \cite{Szegedy_2016_CVPR}.
+
+Formally, it defined as:
+
+\begin{equation}
+    \mathrm{FID(I, I')} = \| \mu_I - \mu_{I'} \|^2 + \tr(\Sigma_I + \Sigma_{I'} - 2(\Sigma_I \Sigma_{I'})^{\frac{1}{2}})
+\end{equation}
+
+where
+
+\begin{itemize}
+	\item $\mathcal{N}(\mu_I, \Sigma_I)$ is the multivariate normal distribution estimated from Inception v3 based on ground truth imagery.
+	\item $\mathcal{N}(\mu_{I'}, \Sigma_{I'})$ is the multivariate normal distribution estimated from Inception v3 based on synthesized imagery.
+\end{itemize}
 
 \subsection{Kernel Inception Distance}
+
+Kernel inception distance is a metric similar to FID, also based on the Inception v3 model. Unlike FID, however, it computes the difference using Maximum Mean Discrepancy (MMD) with a polynomal kernel function \cite{bińkowski2018demystifying}.
+
+Formally this is expressed as:
+
+\begin{equation}
+    \mathrm{KID} = \mathrm{MMD}(I, I')^2
+\end{equation}
+
+with the polynomial kernel function:
+
+\begin{equation}
+    k(x, y) = (\gamma x^T y + c)^d
+\end{equation}
+
+where in our work:
+
+\begin{itemize}
+    \item $\gamma = 1 / $representation dimension
+    \item $c = 1$
+    \item $d = 3$
+\end{itemize}
+
+\section{Experimental Setting}
+
+We evaluate the models outlined in sections \ref{sec:controlnet-model} on the test split in three different levels of masking for comparing the difference between the imagery. For the purposes of evaluation we refer to the model with masking only applied to the ground truth imagery as outlined in section~\ref{sec:loss-masking} as target masking, and the model with mutual information masking as outlined in section~\ref{sec:mut-masking} as full masking. We also include a baseline for a model that always predicts the mean of the ground imagery in the training set.
+
+First we evaluate the models based on the full imagery output as compared with the ground truth imagery. This serves for the purposes of completeness and demonstrating that masking does not unduly bias the results. However, it is of limited usefulness as the results are heavily biased by differences between the regions where the true imagery is missing data and the model generated imagery, which was specifically trained to not exhibit this behavior as outlined in section~\ref{sec:loss-masking}. We will refer to this as unmasked evaluation.
+
+To address this we then evaluate the models while masking to only include data that exists in the true ground imagery, as in section~\ref{sec:loss-masking}. We believe this to likely be the most representative evaluation of our techniques.
+
+Lastly, we evaluate the models using only the mutual information mask. This is to help determine the effectiveness of your mutual information masking techniques from section~\ref{sec:mut-masking}. If these techniques are effective for better guiding the performance of the model, we should expect comparable or better performance between the target masking and full masking on this imagery.
+
+\section{Quantitative Evaluation}
+
+As can be seen be seen from tables \ref{tab:unmasked} and \ref{tab:gt-masked}, ground truth masking for the purposes of evaluation while it made significant differences to the values themselves, didn't change the general trends of results.
+
+Models trained using both methods of masking struggled to compete against the
+baseline on our more traditional (not-learning based) metrics. This is an
+unfortunate, but not unsurprising result. These more traditional metrics
+have little understanding of true photorealism, and rather focus on the absolute
+difference between the output image and the ground truth imagery. In addition of the instability inherent to diffusion model generation, as well as artifacts present in the training data, the diffusion model at times struggled to reconstruct the desired aspects of the data.
+
+However, on metrics with a greater focus on quantifying higher-level differences between imagery, our models perform much better than the baseline. Namely, the FID and KID of our models represent an order of magnitude improvement over our na\"ive baseline. This is likely because these metrics focus on the how the distribution of higher level features (as extracted by classifier networks) compare, on which our models can be visually seen to perform well at producing imagery resembling that of mars.
+
+Lastly, our experiments with full masking have yielded mixed results. While it, unsurprisingly, performs worse in the full scope evaluation of tables \ref{tab:unmasked} and \ref{tab:gt-masked}, we were surprised to see that even in the fully masked evaluation shown in table \ref{tab:cond-masked}, it did not show universally better performance. It performed marginally better on SD and KID, but marginally worse on PSNR, SSIM, and FID. We believe this might have been due to similar issues with over fitting on artifacts in the data.
 
 \begin{table}
 
 \begin{tabular}{ l c c c c c }
-\hline
+\toprule
     & SD $\uparrow$ & PSNR $\uparrow$ & SSIM $\uparrow$ & FID $\downarrow$ & KID ($\overline{x}$) $\downarrow$ \\
-\hline
+\midrule
 Mean Baseline & \textbf{20.24} & \textbf{19.10} & \textbf{0.6123} & 475.50 & 0.6320 \\
 Target Masking & 15.88 & 14.19 & 0.4823 & \textbf{168.9} & \textbf{0.1111} \\
 Full Masking & 15.92 & 12.86 & 0.3807 & 228.50 & 0.1728 \\
-\hline
+\bottomrule
 \end{tabular}
 
 \caption{Mean SD, PSNR, SSIM, FID, and KID across the test set without any masking.}
@@ -108,9 +198,52 @@ present in \textbf{both} the projected conditioning imagery and masked ground im
 
 \end{table}
 
+\section{Qualitative Evaluation}
+
+While the initial results are promising, our model exhibits a number of artifacts that degrade the geometrical accuracy and photorealism of the image. The first major issue is that of our inelegant splitting of the training imagery mentioned in section~\ref{sec:image-split}. This has been revealed to be unnecessary, and creates obvious artifacts in the produced imagery that are undesirable.
+
+Another major known artifact is that the model attempts to reconstruct the perseverance rover within the imagery. This fact alone may have been why full image masking was met with limited success, as the rover often occluded the mutual information portion of the image. This leads the model to predict the rover more often than not, which is not our goal in producing the imagery. This is then exacerbated by the image split issues, causing the rover to occlude almost all of the image in many of the fully masked cases.
+
+In cases where the model does predict terrain though, it often performs quite well. For instance, in prediction of 0533 and 0627, it was able to accurately infer the shape of terrain and reconstruct it, as shown in figure~\ref{fig:no-mask-good}. However, in other cases, it struggles to reproduce the large scale features or hallucinate non-existent textures, such as in figure~\ref{fig:no-mask-bad}.
+
+\begin{figure}
+
+\begin{tabular}{cc}
+    \includegraphics[width=0.45\linewidth]{ground_true/N_LRGB_0533XRZS_0261222_CYL_L_AUTOGENJ01.jpg}
+    &
+    \includegraphics[width=0.45\linewidth]{no_mask_assembled/N_LRGB_0533XRZS_0261222_CYL_L_AUTOGENJ01.jpg}
+    \\
+    \includegraphics[width=0.45\linewidth]{ground_true/N_LRGB_0627XRZS_0301172_CYL_L_AUTOGENJ02.jpg}
+    &
+    \includegraphics[width=0.45\linewidth]{no_mask_assembled/N_LRGB_0627XRZS_0301172_CYL_L_AUTOGENJ02.jpg}
+\end{tabular}
+
+\caption{Cases where the no mask model performs well, the contours of the geometry are well-replicated.}
+\label{fig:no-mask-good}
+
+\end{figure}
+
+\begin{figure}
+
+\begin{tabular}{cc}
+    \includegraphics[width=0.45\linewidth]{ground_true/N_LRGB_1066_RZS_0501534_CYL_L_AUTOGENJ04.jpg}
+    &
+    \includegraphics[width=0.45\linewidth]{no_mask_assembled/N_LRGB_1066_RZS_0501534_CYL_L_AUTOGENJ04.jpg}
+    \\
+    \includegraphics[width=0.45\linewidth]{ground_true/N_LRGB_1312XRZS_0611928_CYL_L_AUTOGENJ03.jpg}
+    &
+    \includegraphics[width=0.45\linewidth]{no_mask_assembled/N_LRGB_1312XRZS_0611928_CYL_L_AUTOGENJ03.jpg}
+\end{tabular}
+
+\caption{Cases where the no mask model performs poorly, the close up contours of the geometry are not replicated, as well as hallucinated textures that are not consistent with the original imagery.}
+\label{fig:no-mask-bad}
+
+\end{figure}
+
 \section{Limitations}
 
-\begin{itemize}
-	\item Pollution between the train and test set due to similar imagery
-	\item Potential mosaic timestamp goelocation misalignment
-\end{itemize}
+Due to issues inherent to the data, this work has a couple of limitations that should be taken into consideration.
+
+First, the data contains multiple images from similar or sometimes even the exact same location. While having multiples of these images is still useful for training and reconstruction, it presents issues when generating the train and test splits. Specifically, there can effectively be data leakage (due to very similar ground imagery) between the train and test splits when simple random sampling is used. Since this issue was only discovered after model training, this issue has not been mitigated in this work, but could be for future work.
+
+Second, and more minor, is that because the mosaics are assembled at a different time than the actual imagery is taken, there is the potential for difference between the location at which the image mosaic was assembled.

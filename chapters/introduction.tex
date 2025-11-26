@@ -1,15 +1,28 @@
 \chapter{Introduction} \label{sec:introduction}
 
-Ground view images of Mars are comparatively commonplace in the modern
-day, thanks to the ongoing work of the Curiosity and Perseverance rovers, the
-imagery currently is only able to capture a miniscule slice of mars as a whole.
-Due to the limited mobility and time of the Mars rovers, only very small and
-particularly interesting areas of Mars have been seen thus far.
+Ground view images of Mars are comparatively commonplace in the modern day,
+thanks to the ongoing work of the Curiosity and Perseverance rovers. However,
+due to the limited mobility of the rovers, they are only able to capture a
+minuscule slice of mars as a whole from the ground. There exists, however, a
+large quantity of high-resolution satellite imagery of the martian surface,
+along with accompanying digital elevation models (DEMs), as captured by the
+long-running HiRISE mission. To be able to view virtually anywhere on mars, or
+to at least approximate a view from this satellite data has wide ranging
+applications such as education and outreach, tools for enriching media content,
+and as a potential visualization tool for rover operations.
 
-There exists, however, a large quantity of high-resolution satellite imagery of
-the martian surface, along with accompanying digital elevation models (DEMs).
-From this data, we believe a large quantity of data about the martian surface
-can be inferred from contextual information, allowing the problem to be viewed
-as a kind of upscaling problem. To this end, generative machine learning is
-well-suited, as it has been applied with success at finding and enhancing latent
-detail with applications focusing on upscaling images [SOURCE]. 
+To this end, we propose a dataset and method to create realistic 360\degree{} panorama reconstructions from a patch of satellite imagery and DEM data.
+
+We utilize the panoramic mosaic imagery released periodically during mars rover operations as the ground truth target. This imagery is assembled from many individual images, taken by the rover, that is then reprojected onto a central cylindrical projection. Using the location at which this imagery was taken, we then assemble a data processing pipeline to find their associated satellite imagery and DEM data, as well as project it to a simulated camera view.
+
+We take cues from CrossViewDiff \cite{li2024crossviewdiff} and utilize a ControlNet addition to Stable Diffusion 2.1, and utilize a ground view reprojection of the data as our prior, similar to \citeauthor{lu2020geometryaware} \cite{lu2020geometryaware}.
+
+Our contributions are as follows:
+
+\begin{itemize}
+    \item We create a dataset for aerial-to-ground synthesis for mars imagery, suitable for our work and as the basis for future work.
+    \item We create a pipeline to reconstruct 360\degree{} panoramas of ground imagery from a satellite image and associated DEM data.
+    \item We evaluate our pipeline on a wide variety of metrics against a simple mean baseline.
+\end{itemize}
+
+We evaluate our method on a test split of the dataset on SD, PSNR, SSIM, FID, and KID.

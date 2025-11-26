@@ -230,7 +230,7 @@ The full data processing pipeline is visualized in figure~\ref{fig:data-pipeline
 
 \end{tikzpicture}
 
-\caption{Data Processing Pipeline}
+\caption{Satellite imagery processing pipeline, where the time is taken from ground truth imagery to locate the rover's position, from which tiles are sliced from the full sattelite imagery and DEM data. This is then fed into a blender-based reprojection script for the production of the final imagery.}
 \label{fig:data-pipeline}
 
 \end{figure}
@@ -251,17 +251,21 @@ as for calculating results.
 
 The dataset was split into two partitions, a train split and the holdout test split using a simple random sampling, with 80\% train split and 20\% test split.
 
-\section{ControlNet Model}
+\section{ControlNet Model} \label{sec:controlnet-model}
 
 A controlnet model based on Stable Diffusion 2.1 was trained on the projected
 ground view imagery. This was trained using a script originally created to fine
 tune stable diffusion 2.1 models, and was subsequently modified to automatically
 split and optionally appropriately mask the train images. The model was trained
-on the dataset with a learning rate of $lr = 10^{-5}$ for 2000 epochs on 2x
+on the dataset with a learning rate of $lr = 10^{-5}$ for 1000 epochs on 2x
 NVIDIA V100 GPU. To conserve memory and allow for faster train, 16-bit floats
 were used for the model.
 
-\subsection{Loss Function Ground Truth Masking}
+\subsection{Image Splitting} \label{sec:image-split}
+
+The Stable Diffusion 2.1 foundation model our work builds off of was only designed initially to produce square images. This presents an issue for our 1024x512 images present in our work. We address this with the rather inelegant solution of splitting the images horizontally into two 512x512 images, on which the model is trained independently.
+
+\subsection{Loss Function Ground Truth Masking} \label{sec:loss-masking}
 
 A factor that adds additional complexity is that panoramic mosaics that serve as
 ground truth imagery can have missing data, and in fact do in almost all cases.
@@ -291,7 +295,7 @@ imagery as per normal, as shown in figure~\ref{fig:gt-masking-ex}.
 
 \end{figure}
 
-\subsection{Mutual Information Masking}
+\subsection{Mutual Information Masking} \label{sec:mut-masking}
 
 Additional experiments were conducted with masking loss function on the intersection between the data present in both the conditioning image and the true ground imagery. We refer to this as mutual information masking since we are masking to only train the model on the mutually included information between the views. This was done by taking the bitwise and of a mask of both the ground and prior imagery, then applying that to the predicted imagery and the ground imagery for loss calculation, as shown in figure~\ref{fig:mi-masking-ex}.
 
