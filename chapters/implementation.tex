@@ -274,7 +274,7 @@ a lack of data, not true colors of the image. This is obvious to our eyes, but
 less so to a machine learning model, leading it to reproduce these artifacts in
 its output. This is undesirable, and so we compensate for it by masking the
 predicted image such that the model loss is only computed between the section of
-imagery that is truly present in the imagery. This is done by shareholding for
+imagery that is truly present in the imagery. This is done by thresholding for
 non-black pixels to create a ground image mask. This mask is the applied to the
 predicted imagery, and the loss is then subsequently calculated between the
 imagery as per normal, as shown in figure~\ref{fig:gt-masking-ex}.
@@ -295,14 +295,16 @@ imagery as per normal, as shown in figure~\ref{fig:gt-masking-ex}.
 
 \end{figure}
 
-\subsection{Mutual Information Masking} \label{sec:mut-masking}
+\subsection{Joint Ground \& Projected View Masking} \label{sec:mut-masking}
 
-Additional experiments were conducted with masking loss function on the intersection between the data present in both the conditioning image and the true ground imagery. We refer to this as mutual information masking since we are masking to only train the model on the mutually included information between the views. This was done by taking the bitwise and of a mask of both the ground and prior imagery, then applying that to the predicted imagery and the ground imagery for loss calculation, as shown in figure~\ref{fig:mi-masking-ex}.
+Additional experiments were conducted with masking loss the function on the intersection between the data present in both the conditioning image and the true ground imagery. The theoretical basis being that the region of non-black pixels in both the porjected ground view and the true ground view is the only region where there is an actual overlap in information between the groud imagery and the sattelite patch. Of course, this assumes that the registration of both images is perfect, which is not the case, however we decided to test this to see if it could still improve results for the intersection between the views even given that caveat.
+
+This was done by taking the bitwise and of a mask of both the ground and prior imagery, then applying that to the predicted imagery and the ground imagery for loss calculation, as shown in figure~\ref{fig:mi-masking-ex}.
 
 \begin{figure}
 
 \includegraphics[width=\linewidth]{full-mask-ex.jpg}
-\caption{Example pipeline for mutual information masking the loss, with MSE loss as an example.}
+\caption{Example pipeline for joint masking the loss on only the data present in both the gorund and conditioning imagery, with MSE loss as an example.}
 \label{fig:mi-masking-ex}
 
 \end{figure}

@@ -119,13 +119,13 @@ where in our work:
 
 \section{Experimental Setting}
 
-We evaluate the models outlined in sections \ref{sec:controlnet-model} on the test split in three different levels of masking for comparing the difference between the imagery. For the purposes of evaluation we refer to the model with masking only applied to the ground truth imagery as outlined in section~\ref{sec:loss-masking} as target masking, and the model with mutual information masking as outlined in section~\ref{sec:mut-masking} as full masking. We also include a baseline for a model that always predicts the mean of the ground imagery in the training set.
+We evaluate the models outlined in sections \ref{sec:controlnet-model} on the test split in three different levels of masking for comparing the difference between the imagery. For the purposes of evaluation we refer to the model with masking only applied to the ground truth imagery as outlined in section~\ref{sec:loss-masking} as target masking, and the model with joint masking as outlined in section~\ref{sec:mut-masking} as full masking. We also include a baseline for a model that always predicts the mean of the ground imagery in the training set.
 
 First we evaluate the models based on the full imagery output as compared with the ground truth imagery. This serves for the purposes of completeness and demonstrating that masking does not unduly bias the results. However, it is of limited usefulness as the results are heavily biased by differences between the regions where the true imagery is missing data and the model generated imagery, which was specifically trained to not exhibit this behavior as outlined in section~\ref{sec:loss-masking}. We will refer to this as unmasked evaluation.
 
 To address this we then evaluate the models while masking to only include data that exists in the true ground imagery, as in section~\ref{sec:loss-masking}. We believe this to likely be the most representative evaluation of our techniques.
 
-Lastly, we evaluate the models using only the mutual information mask. This is to help determine the effectiveness of your mutual information masking techniques from section~\ref{sec:mut-masking}. If these techniques are effective for better guiding the performance of the model, we should expect comparable or better performance between the target masking and full masking on this imagery.
+Lastly, we evaluate the models while limiting the region of interest to only the joing mask. This is to help determine the effectiveness of our joint masking techniques from section~\ref{sec:mut-masking}. If these techniques are effective for better guiding the performance of the model, we should expect comparable or better performance between the target masking and full masking on this imagery.
 
 \section{Quantitative Evaluation}
 
@@ -149,7 +149,7 @@ Lastly, our experiments with full masking have yielded mixed results. While it, 
 \midrule
 Mean Baseline & \textbf{20.24} & \textbf{19.10} & \textbf{0.6123} & 475.50 & 0.6320 \\
 Target Masking & 15.88 & 14.19 & 0.4823 & \textbf{168.9} & \textbf{0.1111} \\
-Full Masking & 15.92 & 12.86 & 0.3807 & 228.50 & 0.1728 \\
+Joint Masking & 15.92 & 12.86 & 0.3807 & 228.50 & 0.1728 \\
 \bottomrule
 \end{tabular}
 
@@ -165,8 +165,8 @@ Full Masking & 15.92 & 12.86 & 0.3807 & 228.50 & 0.1728 \\
     & SD $\uparrow$ & PSNR $\uparrow$ & SSIM $\uparrow$ & FID $\downarrow$ & KID ($\overline{x}$) $\downarrow$ \\
 \hline
 Mean Baseline & \textbf{20.53} & \textbf{22.73} & \textbf{0.7883} & 271.10 & 0.2631 \\
-Target Masking & 16.60 & 16.99 & 0.6338 & \textbf{149.10} & \textbf{0.08959} \\
-Full Masking & 16.71 & 15.13 & 0.5540 & 182.80 & 0.1099 \\
+Ground Masking & 16.60 & 16.99 & 0.6338 & \textbf{149.10} & \textbf{0.08959} \\
+Joint Masking & 16.71 & 15.13 & 0.5540 & 182.80 & 0.1099 \\
 \hline
 \end{tabular}
 
@@ -185,8 +185,8 @@ present in the true ground imagery.
     & SD $\uparrow$ & PSNR $\uparrow$ & SSIM $\uparrow$ & FID $\downarrow$ & KID ($\overline{x}$) $\downarrow$ \\
 \hline
 Mean Baseline & \textbf{16.76} & \textbf{14.81} & \textbf{0.4377} & 260.30 & 0.2502 \\
-Target Masking & 14.68 & 13.64 & 0.3351 & \textbf{191.60} & 0.1373 \\
-Full Masking & 15.42 & 12.80 & 0.3014 & 203.6 & \textbf{0.1368} \\
+Ground Masking & 14.68 & 13.64 & 0.3351 & \textbf{191.60} & 0.1373 \\
+Joint Masking & 15.42 & 12.80 & 0.3014 & 203.6 & \textbf{0.1368} \\
 \hline
 \end{tabular}
 
@@ -202,7 +202,7 @@ present in \textbf{both} the projected conditioning imagery and masked ground im
 
 While the initial results are promising, our model exhibits a number of artifacts that degrade the geometrical accuracy and photorealism of the image. The first major issue is that of our inelegant splitting of the training imagery mentioned in section~\ref{sec:image-split}. This has been revealed to be unnecessary, and creates obvious artifacts in the produced imagery that are undesirable.
 
-Another major known artifact is that the model attempts to reconstruct the perseverance rover within the imagery. This fact alone may have been why full image masking was met with limited success, as the rover often occluded the mutual information portion of the image. This leads the model to predict the rover more often than not, which is not our goal in producing the imagery. This is then exacerbated by the image split issues, causing the rover to occlude almost all of the image in many of the fully masked cases.
+Another major known artifact is that the model attempts to reconstruct the perseverance rover within the imagery. This fact alone may have been why full image masking was met with limited success, as the rover often occluded the overlapping portion of the image. This leads the model to predict the rover more often than not, which is not our goal in producing the imagery. This is then exacerbated by the image split issues, causing the rover to occlude almost all of the image in many of the fully masked cases.
 
 In cases where the model does predict terrain though, it often performs quite well. For instance, in prediction of 0533 and 0627, it was able to accurately infer the shape of terrain and reconstruct it, as shown in figure~\ref{fig:no-mask-good}. However, in other cases, it struggles to reproduce the large scale features or hallucinate non-existent textures, such as in figure~\ref{fig:no-mask-bad}.
 
