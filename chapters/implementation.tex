@@ -261,9 +261,9 @@ on the dataset with a learning rate of $lr = 10^{-5}$ for 1000 epochs on 2x
 NVIDIA V100 GPU. To conserve memory and allow for faster train, 16-bit floats
 were used for the model.
 
-\subsection{Image Splitting} \label{sec:image-split}
+% \subsection{Image Splitting} \label{sec:image-split}
 
-The Stable Diffusion 2.1 foundation model our work builds off of was only designed initially to produce square images. This presents an issue for our 1024x512 images present in our work. We address this with the rather inelegant solution of splitting the images horizontally into two 512x512 images, on which the model is trained independently.
+% The Stable Diffusion 2.1 foundation model our work builds off of was only designed initially to produce square images. This presents an issue for our 1024x512 images present in our work. We address this with the rather inelegant solution of splitting the images horizontally into two 512x512 images, on which the model is trained independently.
 
 \subsection{Loss Function Ground Truth Masking} \label{sec:loss-masking}
 
