@@ -1,0 +1,65 @@
+\begin{tikzpicture}[
+  io/.style={
+    draw=black
+  },
+  stage/.style={
+    draw=black,
+    minimum height=0.5\linewidth,
+    minimum width=0.2\linewidth
+  },
+  descr/.style={
+    fill=white,
+    inner sep=2.5pt
+  }
+]
+
+  \node [stage] (gdal) {
+    \begin{minipage}{1.5cm} % adjust width for your layout
+        \centering
+        \rotatebox{270}{GDAL Tile Extraction}\\[2pt]
+        \includegraphics[width=\linewidth]{gdalicon.png}
+    \end{minipage}
+  };
+
+  \node [io, above left=-3.4cm and 1cm of gdal] (rgbfull) {
+    \includegraphics[height=0.18\linewidth]{JEZ_hirise_soc_007_orthoMosaic_25cm_Ortho_blend120_thumb.png}
+  };
+
+  \node [io, below=of rgbfull] (dtmfull) {
+    \includegraphics[height=0.18\linewidth]{JEZ_hirise_soc_006_DTM_MOLAtopography_DeltaGeoid_1m_Eqc_latTs0_lon0_blend40_thumb.png}
+  };
+
+  \node [io, above right=-3.4cm and 1cm of gdal] (rgbtile) {
+    \includegraphics[height=0.18\linewidth]{N_LRGB_1252_RZS_0590000_CYL_L_AUTOGENJ03_sat.png}
+  };
+
+  \node [io, below=of rgbtile] (dtmtile) {
+    \includegraphics[height=0.18\linewidth]{N_LRGB_1252_RZS_0590000_CYL_L_AUTOGENJ03_dem.png}
+  };
+
+  \node [io, above=of gdal] (ground) {
+    \includegraphics[height=0.18\linewidth]{N_LRGB_1252_RZS_0590000_CYL_L_AUTOGENJ03.png}
+  };
+
+  \node [stage, below right=-3.4cm and 1cm of rgbtile] (blender) {
+    \begin{minipage}{1.5cm} % adjust width for your layout
+        \centering
+        \rotatebox{270}{Blender Reprojection}\\[2pt]
+        \includegraphics[width=\linewidth]{blender_icon_128x128.png}
+    \end{minipage}
+  };
+
+  \node [io, below left=1cm and -3cm of blender] (vis) {
+    \includegraphics[height=0.18\linewidth]{N_LRGB_1252_RZS_0590000_CYL_L_AUTOGENJ03_vis.png}
+  };
+
+  \draw[-stealth] (ground.south) to node[descr] {Rover Mosaic Creation Time} (gdal.north);
+  \draw[-stealth] (rgbfull.east) |- ([yshift=2cm]gdal.west);
+  \draw[-stealth] (dtmfull.east) |- ([yshift=-2.25cm]gdal.west);
+  \draw[-stealth] ([yshift=2cm]gdal.east) |- (rgbtile.west);
+  \draw[-stealth] ([yshift=-2.25cm]gdal.east) |- (dtmtile.west);
+  \draw[-stealth] (rgbtile.east) |- ([yshift=2cm]blender.west);
+  \draw[-stealth] (dtmtile.east) |- ([yshift=-2.25cm]blender.west);
+  \draw[-stealth] (blender.south) -- ++(0,-0.5) -| (vis.north);
+
+\end{tikzpicture}

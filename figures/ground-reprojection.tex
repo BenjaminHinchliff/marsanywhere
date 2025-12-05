@@ -1,0 +1,31 @@
+\begin{tikzpicture}[
+  io/.style={
+    draw=black
+  },
+  stage/.style={
+    draw=black
+  },
+  descr/.style={
+    fill=white,
+    inner sep=2.5pt
+  }
+]
+  \node [io] (raw) {
+    \includegraphics[width=0.30\linewidth]{N_LRGB_0124_RZS_0041678_CYL_L_AUTOGENJ03_raw.jpg}
+  };
+
+  \node [stage, right=of raw] (reproj) {
+    \begin{minipage}{0.2\linewidth} % adjust width for your layout
+        \centering
+        \includegraphics[width=\linewidth]{reproj-icon.jpg} \\
+        Reprojection
+    \end{minipage}
+  };
+
+  \node [io, right=of reproj] (projed) {
+    \includegraphics[width=0.30\linewidth]{N_LRGB_0124_RZS_0041678_CYL_L_AUTOGENJ03_proj.jpg}
+  };
+
+  \draw[-stealth] (raw.east) |- (reproj.west);
+  \draw[-stealth] (reproj.east) |- (projed.west);
+\end{tikzpicture}
