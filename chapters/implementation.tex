@@ -15,10 +15,10 @@ Data was all sourced from publicly available NASA resources.
 
 The Ground imagery was collected from NASA Jet Propulsion Laboratory's Planetary
 Data Systems data node, filtered for cylindrically projected mosaic panoramic
-images released from the perseverance rover \cite{PDS_IMG_Node_Mars2020}.
+images released from the Perseverance rover \cite{PDS_IMG_Node_Mars2020}.
 
 The satellite views were sourced from processed GeoTIFF map data released by
-NASA as part of the planning for landing the perseverance rover in the Jezero
+NASA as part of the planning for landing the Perseverance rover in the Jezero
 crater region. This data was initially collected from the GeoTIFF released as a
 part of the Mars Trek application \cite{MarsTrek_Law2017}, but was later swapped
 to use data from the slightly less comprehensive Jezero crater region HiRISE
@@ -76,7 +76,7 @@ other works done in the field.
 \subsection{Satellite Imagery}
 
 % \begin{itemize}
-%   \item HiRISE Geotiff
+%   \item HiRISE GeoTIFF
 %   \item SPICE localization lookup
 %   \item GDAL tile cropping
 %   \item Blender ground view reprojection
@@ -84,7 +84,7 @@ other works done in the field.
 
 The ground imagery does not contain localization information trivially
 convertible to latitude and longitude. Position information is given in a
-mars-fixed Cartesian frame relative to a recursively defined "site frame", where
+Mars-fixed Cartesian frame relative to a recursively defined "site frame", where
 the first site frame is defined relative to the rover landing location and the
 second site frame is defined relative to the first, etc.
 
@@ -94,7 +94,7 @@ public releases of rover localizations. In our work, we used publicly available
 SPICE data to do this \cite{mars2020_spice_kernels_2025}. We may have been able
 to use the simpler PLACES database, but is has a lower temporal resolution of
 only one position per day and no inbuilt interpolation. Using python and
-Spiceypy, we looked up the latitude and longitude of the Perseverance rover at a
+SpiceyPy, we looked up the latitude and longitude of the Perseverance rover at a
 given time when a mosaic image was assembled \cite{SpiceyPy_Annex2020}. Since
 most mosaics are assembled while the rover is still at the location of the
 mosaic images, this provides a good heuristic for the rover's approximate
@@ -112,22 +112,24 @@ just under 300 m diameter.
 Preliminary testing found that a Controlnet based model performed poorly on
 sattelite/dem imagery alone. We believe this is likely because the U-Net
 architecture used by Stable Diffusion 2.1 struggles to encode the quite complex
-non-linear perspective shifts in the data, and as such stuggles to converge into
+non-linear perspective shifts in the data, and as such struggles to converge into
 a useful result. This is consistent with the work of
 \citeauthor{li2024crossviewdiff}, where they chose to use a ground view sky mask
 to guide the diffusion process \cite{li2024crossviewdiff}. We do not have access
 to sky mask data, and don't want to use it as a prior, so chose to instead use a
-conceptually similar approach of reprojecting the sattelite view tiles into the
-ground view space to make the persepctive shift minimal.
+conceptually similar approach of reprojecting the satellite view tiles into the
+ground view space to make the perspective shift minimal.
 
-This was done using Blender, an open source 3d graphics suite that includes a
-robust scripting API \cite{blender2025}. The sattelite view was projected onto a
+This was done using Blender, an open source 3D graphics suite that includes a
+robust scripting API \cite{blender2025}. The satellite view was projected onto a
 plane of size 2.0 units. The plane was then subdivided in accordance with the
 resolution of the ground DEM texture, and then the DEM texture was applied as a
 displacement modifier to the plane. The plane was then offset by the scaled
 height of the displacement height under the camera (the center of the texture),
 such that the displaced plane would remain fixed near the scene origin. From
-empirical testing, we found that a displacement strength of 0.1 and a camera height of 0.25 units produced resulsts reasonably consistent with the ground view imagery.
+empirical testing, we found that a displacement strength of 0.1 and a camera
+height of 0.25 units produced results reasonably consistent with the ground view
+imagery.
 
 The full data processing pipeline is visualized in figure~\ref{fig:data-pipeline}.
 
@@ -135,7 +137,10 @@ The full data processing pipeline is visualized in figure~\ref{fig:data-pipeline
 
 \input{figures/sattelite-processing.tex}
 
-\caption{Satellite imagery processing pipeline, where the time is taken from ground truth imagery to locate the rover's position, from which tiles are sliced from the full sattelite imagery and DEM data. This is then fed into a blender-based reprojection script for the production of the final imagery.}
+\caption{Satellite imagery processing pipeline, where the time is taken from
+ground truth imagery to locate the rover's position, from which tiles are sliced
+from the full satellite imagery and DEM data. This is then fed into a
+blender-based reprojection script for the production of the final imagery.}
 \label{fig:data-pipeline}
 
 \end{figure}
@@ -145,7 +150,7 @@ The full data processing pipeline is visualized in figure~\ref{fig:data-pipeline
 For compatibility with the HuggingFace datasets library, a script was created to
 allow for a custom loading of the dataset. This was first written using the
 HuggingFace datasets api and python library for a custom scripted dataset, but
-with the depreciation of custom scipts (for security reasons) in huggingface
+with the depreciation of custom scripts (for security reasons) in HuggingFace
 datasets v4.0.0, the script was updated to use the imagefolder dataset loader.
 
 This provides additional benefits in that the train and test partitions are
@@ -202,14 +207,25 @@ imagery as per normal, as shown in figure~\ref{fig:gt-masking-ex}.
 
 \subsection{Joint Ground \& Projected View Masking} \label{sec:mut-masking}
 
-Additional experiments were conducted with masking loss the function on the intersection between the data present in both the conditioning image and the true ground imagery. The theoretical basis being that the region of non-black pixels in both the porjected ground view and the true ground view is the only region where there is an actual overlap in information between the groud imagery and the sattelite patch. Of course, this assumes that the registration of both images is perfect, which is not the case, however we decided to test this to see if it could still improve results for the intersection between the views even given that caveat.
+Additional experiments were conducted with masking loss the function on the
+intersection between the data present in both the conditioning image and the
+true ground imagery. The theoretical basis being that the region of non-black
+pixels in both the projected ground view and the true ground view is the only
+region where there is an actual overlap in information between the ground imagery
+and the satellite patch. Of course, this assumes that the registration of both
+images is perfect, which is not the case, however we decided to test this to see
+if it could still improve results for the intersection between the views even
+given that caveat.
 
-This was done by taking the bitwise and of a mask of both the ground and prior imagery, then applying that to the predicted imagery and the ground imagery for loss calculation, as shown in figure~\ref{fig:mi-masking-ex}.
+This was done by taking the bitwise and of a mask of both the ground and prior
+imagery, then applying that to the predicted imagery and the ground imagery for
+loss calculation, as shown in figure~\ref{fig:mi-masking-ex}.
 
 \begin{figure}
 
 \includegraphics[width=\linewidth]{full-mask-ex.jpg}
-\caption{Example pipeline for joint masking the loss on only the data present in both the gorund and conditioning imagery, with MSE loss as an example.}
+\caption{Example pipeline for joint masking the loss on only the data present in
+both the ground and conditioning imagery, with MSE loss as an example.}
 \label{fig:mi-masking-ex}
 
 \end{figure}

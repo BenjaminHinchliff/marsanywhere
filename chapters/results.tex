@@ -199,7 +199,7 @@ FID and KID of our models represent an order of magnitude improvement over our
 na\"ive baseline. This is likely because these metrics focus on the how the
 distribution of higher level features (as extracted by classifier networks)
 compare, on which our models can be visually seen to perform well at producing
-imagery resembling that of mars.
+imagery resembling that of Mars.
 
 Lastly, our experiments with full masking have yielded mixed results. While it,
 unsurprisingly, performs worse in the full scope evaluation of tables
@@ -244,11 +244,23 @@ present in \textbf{both} the projected conditioning imagery and masked ground im
 
 \section{Qualitative Evaluation}
 
-While the initial results are promising, our model exhibits a number of artifacts that degrade the geometrical accuracy and photorealism of the image. The first major issue is that of our inelegant splitting of the training imagery mentioned in section~\ref{sec:image-split}. This has been revealed to be unnecessary, and creates obvious artifacts in the produced imagery that are undesirable.
+While the initial results are promising, our model exhibits a number of
+artifacts that degrade the geometrical accuracy and photorealism of the image.
 
-Another major known artifact is that the model attempts to reconstruct the perseverance rover within the imagery. This fact alone may have been why full image masking was met with limited success, as the rover often occluded the overlapping portion of the image. This leads the model to predict the rover more often than not, which is not our goal in producing the imagery. This is then exacerbated by the image split issues, causing the rover to occlude almost all of the image in many of the fully masked cases.
+A major known artifact is that the model attempts to reconstruct the
+Perseverance rover within the imagery. This fact alone may have been why full
+image masking was met with limited success, as the rover often occluded the
+overlapping portion of the image. This leads the model to predict the rover more
+often than not, which is not our goal in producing the imagery. This is then
+exacerbated by the image split issues, causing the rover to occlude almost all
+of the image in many of the fully masked cases.
 
-In cases where the model does predict terrain though, it often performs quite well. For instance, in prediction of 0533 and 0627, it was able to accurately infer the shape of terrain and reconstruct it, as shown in figure~\ref{fig:no-mask-good}. However, in other cases, it struggles to reproduce the large scale features or hallucinate non-existent textures, such as in figure~\ref{fig:no-mask-bad}.
+In cases where the model does predict terrain though, it often performs quite
+well. For instance, in prediction of 0533 and 0627, it was able to accurately
+infer the shape of terrain and reconstruct it, as shown in
+figure~\ref{fig:no-mask-good}. However, in other cases, it struggles to
+reproduce the large scale features or hallucinate non-existent textures, such as
+in figure~\ref{fig:no-mask-bad}.
 
 \begin{figure}
 
