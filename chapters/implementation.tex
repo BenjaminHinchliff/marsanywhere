@@ -7,13 +7,13 @@ a dataset for use on this problem. We then create a controlnet-based model for u
 
 % \begin{itemize}
 %   \item Satellite - JEZ GeoTiff from Mars Trek
-%   \item DEM - JEZ Geotiff from HiRISE release \url{https://www.uahirise.org/ESP_059352_1985}
+%   \item DEM - JEZ GeoTIFF from HiRISE release \url{https://www.uahirise.org/ESP_059352_1985}
 %   \item Ground Imagery - PDS data node beta archive explorer \url{https://pds-imaging.jpl.nasa.gov/beta/archive-explorer}
 % \end{itemize}
 
 Data was all sourced from publicly available NASA resources.
 
-The Ground imagery was collected from NASA Jet Propulsion Labratory's Planetary
+The Ground imagery was collected from NASA Jet Propulsion Laboratory's Planetary
 Data Systems data node, filtered for cylindrically projected mosaic panoramic
 images released from the perseverance rover \cite{PDS_IMG_Node_Mars2020}.
 
@@ -41,8 +41,8 @@ The DEM data was sourced from the HiRISE data release done by the USGS
 
 The Perseverance ground imagery's native form is in VICAR format, and so imagery
 was opened using a patched version rms-vicar, a python-based VICAR file reader
-maintrained by SETI \cite{hinchliff2025rms‐vicar}. While PNG releases of
-converted images are also done, VICAR was chosen as the imagery sounce since the
+maintained by SETI \cite{hinchliff2025rms‐vicar}. While PNG releases of
+converted images are also done, VICAR was chosen as the imagery source since the
 specifics of the imagery conversion and if any data is lost is unknown to us.
 
 Since imagery contained absolute intensity instead of sRGB image data, it was
@@ -57,12 +57,9 @@ being only a small portion of a much larger image), it needs to be reprojected
 to a standard panoramic form for usage in machine learning.
 
 This was done using a Python and OpenCV to build a remap operation to shift the
-view and height to approximate a uniform perspective for the imagery, using the following formula:
-
-\begin{align}
-    R_j &= \frac{S_j - \theta_{\text{min}}}{\theta_{\text{max}} - \theta_{\text{min}}} n \\
-    R_i &= \frac{S_i - \tan \phi_{\text{min}}}{\tan \phi_{\text{max}} - \tan \phi_{\text{min}}} m
-\end{align}
+view and height to approximate a uniform perspective for the imagery. The
+details of the reprojection formulae is included in
+Appendix~\ref{sec:awful-reprojection-math}.
 
 \begin{figure}
 

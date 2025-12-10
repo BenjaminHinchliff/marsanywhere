@@ -1,13 +1,13 @@
 \chapter{Background} \label{sec:background}
 
 Our work builds on a variety of prior work both by NASA in relation to the Mars
-data used, and on exsiting cross-view pipelines on earth.
+data used, and on existing cross-view pipelines on earth.
 
 \section{The Perseverance (M2020) Rover}
 
 The Mars 2020 mission is the most recent rover mission to Mars, deploying the
 Perseverance rover. The Perseverance rover is structurally very similar to the
-more well-known Curiosity rover, of the Mars Science Labratory (MSL) mission. It
+more well-known Curiosity rover, of the Mars Science Laboratory (MSL) mission. It
 was launched for the purposes of broadening the knowledge of the Martian surface
 and to explore the Jezero crater region. It also has hardware to collect samples
 within the rover and in dead drops for the purposes of eventually being returned
@@ -15,10 +15,10 @@ to earth with the Mars Sample Return (MSR/SRL) mission, or with a future
 mission.
 
 The Perseverance rover makes a number of changes to the sensor suite included on
-the rover. Relavent to this work, both the resolution and bit depth of the
+the rover. Relevant to this work, both the resolution and bit depth of the
 primary navigation cameras on the mast of the rover (Navcam) were upgraded,
 having a 1600x1200 pixel resolution ($\sim$2 megapixels) and being in full color
-\cite{M2020_Willford2018}. This is in constrast to the Curiosity rover, which
+\cite{M2020_Willford2018}. This is in contrast to the Curiosity rover, which
 has 1024x1024 pixel resolution with only black and white
 \cite{MSLNavcam_Maki2012}. This has the impact that the data processing pipeline
 used by this work, as well as the machine learning portion, does not generalize
@@ -29,10 +29,10 @@ rover imagery has been chosen for usage in this work.
 
 The High Resolution Imaging Science Experiment, aka HiRISE mission, is a mission
 focused on high resolution imaging of places of interest on the martian surface.
-Initally launched in 2005, the orbiter arrived at Mars in 2006, where it has
-been operaating ever since (long since exceeding its initial (prime) mission
+Initially launched in 2005, the orbiter arrived at Mars in 2006, where it has
+been operating ever since (long since exceeding its initial (prime) mission
 length of 2 years) \cite{HiRISE_McEwen2007}. All orbital imagery used in this
-work was aquired from imagery captured by the HiRISE orbiter, later processed
+work was acquired from imagery captured by the HiRISE orbiter, later processed
 and released as part of the Mars Trek application  \cite{MarsTrek_Law2017}.
 
 \section{VICAR Files}
@@ -47,7 +47,7 @@ Perhaps due to the age of the format, it utilizes slightly different terminology
 that is common in image formats today. A VICAR file is organized into one or
 more "bands" of data, where each band is has a specified data type. Each band
 has a given number of "lines", the height of the image band, and a given number
-of "samples" per liine, the image width. The start of the file also includes a
+of "samples" per line, the image width. The start of the file also includes a
 labels, text data used both for specifying image metadata (dimensions, pixel
 format, etc), and for arbitrary metadata. In the case of M2020 Perseverance
 imagery, notable metadata includes the location of the image (relative to the
@@ -60,29 +60,45 @@ inside the already widely-utilized TIFF file format. It allows for a TIFF file
 to contain coordinate system information and information on the projection used
 by a given GeoTIFF file to allow for usage in precise geolocation. GeoTIFF is
 also widely supported, with it being a primary file format used by GDAL, an open
-soruce suite of tools for manipulation geographic data.
-[\url{https://docs.ogc.org/is/19-008r4/19-008r4.html}]
+source suite of tools for manipulation geographic data.
 
-In this work, the USGS sattelite data from HiRISE was in GeoTIFF format, and
-manipuulated by GDAL \cite{USGS_Mars2020_TRN_HiRISE_2020, GDAL_2025}.
+In this work, the USGS satellite data from HiRISE was in GeoTIFF format, and
+manipulated by GDAL \cite{USGS_Mars2020_TRN_HiRISE_2020, GDAL_2025}.
 
-\section{Central Cylindrical Projection}
+\section{Central Cylindrical Projection} \label{sec:central-cylindrical-background}
 
-The input panoramas use central cylindrical projection, where the azimuth of the camera directly corresponds with the pixels in the image (with appropriate scaling), and the elevation corresponds to the tangent of the pixels in the image. Formally, that is:
+The input panoramas use central cylindrical projection, where the azimuth of the
+camera directly corresponds with the pixels in the image (with appropriate
+scaling), and the elevation corresponds to the tangent of the pixels in the
+image. Formally, that is:
 
 \begin{align}
-    x &= \frac{2 \pi}{n} \theta \\
-    y &= \frac{\pi}{m} \tan \phi
+    x &= w \left( \frac{\theta - \theta_{\text{min}}}{\theta_{\text{max}} - \theta_{\text{min}}} \right) \\
+    y &= h \left( \frac{\tan \phi - \tan \phi_{\text{min}}}{\tan \phi_{\text{max}} - \tan \phi_{\text{min}}} \right)
 \end{align}
 
-where $x$ and $y$ are the corresponding pixel positions, $n$ is the width of the
-image, and $m$ is the height of the image. This is visualized in figure~\ref{fig:central-cylindrical}.
+where:
+
+\begin{itemize}
+	\item $x$ and $y$ are the corresponding pixel positions
+	\item $w$ and $h$ are the width and height of the image
+	\item $\theta$ is the azimuth of the view (in radians)
+	\item $\phi$ is the elevation of the view (in radians)
+	\item $\phi_{\text{min}}$ and $\phi_{\text{max}}$ are the minimum and
+	maximum elevations of the view, respectively
+\end{itemize}
+
+A visual of this is shown in \cref{fig:central-cylindrical}.
 
 \begin{figure}
 
 \includegraphics[width=0.4\linewidth]{central-cylinder-proj-example.jpg}
 
-\caption{Visualization of central cylindrical projection. Image by C. M. G. Lee (2008), Wikimedia Commons, Licensed under CC BY-SA 4.0 \cite{Lee2008CentralCylindricalLightProjection}.}
+\caption{
+    Visualization of central cylindrical projection. Image by C. M. G. Lee
+    (2008), Wikimedia Commons, Licensed under CC BY-SA 4.0
+    \cite{Lee2008CentralCylindricalLightProjection}.
+}
 \label{fig:central-cylindrical}
 
 \end{figure}

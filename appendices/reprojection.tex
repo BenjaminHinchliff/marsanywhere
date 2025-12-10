@@ -1,0 +1,49 @@
+\chapter{Ground Imagery Reprojection Formulation} \label{sec:awful-reprojection-math}
+
+Suppose two cylindrically projected images, each with different extents
+in terms of azimuth and elevation. We will here call the image to be projected
+onto the final image, and the image to be projected the initial image, denoted
+with the subscript $f$ and $i$, respectively.
+
+Each image is parameterized by a width $w$, height $h$, minimum azimuth
+$\theta_{\text{min}}$, maximum azimuth $\theta_{\text{max}}$, minimum elevation
+$\phi_{\text{min}}$, and maximum elevation $\phi_{\text{max}}$.
+
+As outlined in \cref{sec:central-cylindrical-background}, a given azimuth and
+elevation can be projected onto an image as follows:
+
+\begin{align}
+    x &= w \left( \frac{\theta - \theta_{\text{min}}}{\theta_{\text{max}} - \theta_{\text{min}}} \right) \label{eq:central-cylindrical-project-x} \\
+    y &= h \left( \frac{\tan \phi - \tan \phi_{\text{min}}}{\tan \phi_{\text{max}} - \tan \phi_{\text{min}}} \right) \label{eq:central-cylindrical-project-y}
+\end{align}
+
+By solving for $\theta$ and $\phi$, we can obtain the following equation for
+converting from an $x$, $y$ position on a projected image to a $\theta$, $\phi$
+azimuth elevation. Note that this is a linear interpolation.
+
+\begin{align}
+	\theta &= \frac{x}{w} \theta_{\text{max}} + \left( 1 - \frac{x}{w} \right) \theta_{\text{min}} \\
+	\phi &= \arctan \left( \frac{y}{h} \tan \phi_{\text{max}} + \left( 1 - \frac{y}{h} \right) \tan \phi_{\text{min}} \right)
+\end{align}
+
+Using this formulation, given a point on the initial image $x_i$, $y_i$ we can
+calculate its corresponding azimuth and elevation angles as follows:
+
+\begin{align}
+	\theta &= \frac{x_i}{w_i} \theta_{\text{max}_i} + \left( 1 - \frac{x_i}{w_i} \right) \theta_{\text{min}_i} \\
+	\phi &= \arctan \left( \frac{y_i}{h_i} \tan \phi_{\text{max}_i} + \left( 1 - \frac{y_i}{h_i} \right) \tan \phi_{\text{min}_i} \right)
+\end{align}
+
+This can then be substituted into \cref{eq:central-cylindrical-project-x,eq:central-cylindrical-project-y} as follows:
+
+\begin{align}
+    x_f &= w_f \left( \frac{\theta - \theta_{\text{min}_f}}{\theta_{\text{max}_f} - \theta_{\text{min}_f}} \right) \\
+    y_f &= h_f \left( \frac{\tan \phi - \tan \phi_{\text{min}_f}}{\tan \phi_{\text{max}_f} - \tan \phi_{\text{min}_f}} \right)
+\end{align}
+
+Fully expanded, the formula to project any point $x_i$, $y_i$ the initial image onto the corresponding point $x_f$, $y_f$ in the final image is as follows:
+
+\begin{align}
+x_f &= w_f \left( \frac{\left( \frac{x_i}{w_i} \theta_{\text{max}_i} + \left( 1 - \frac{x_i}{w_i} \right) \theta_{\text{min}_i} \right) - \theta_{\text{min}_f}}{\theta_{\text{max}_f} - \theta_{\text{min}_f}} \right) \\
+y_f &= h_f \left( \frac{\left( \frac{y_i}{h_i} \tan \phi_{\text{max}_i} + \left( 1 - \frac{y_i}{h_i} \right) \tan \phi_{\text{min}_i} \right) - \tan \phi_{\text{min}_f}}{\tan \phi_{\text{max}_f} - \tan \phi_{\text{min}_f}} \right)
+\end{align}
