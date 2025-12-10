@@ -11,11 +11,20 @@ to at least approximate a view from this satellite data has wide ranging
 applications such as education and outreach, tools for enriching media content,
 and as a potential visualization tool for rover operations.
 
-To this end, we propose a dataset and method to create realistic 360\degree{} panorama reconstructions from a patch of satellite imagery and DEM data.
+To this end, we propose a dataset and method to create realistic 360\degree{}
+panorama reconstructions from a patch of satellite imagery and DEM data.
 
-We utilize the panoramic mosaic imagery released periodically during mars rover operations as the ground truth target. This imagery is assembled from many individual images, taken by the rover, that is then reprojected onto a central cylindrical projection. Using the location at which this imagery was taken, we then assemble a data processing pipeline to find their associated satellite imagery and DEM data, as well as project it to a simulated camera view.
+We utilize the panoramic mosaic imagery released periodically during mars rover
+operations as the ground truth target. This imagery is assembled from many
+individual images, taken by the rover, that is then reprojected onto a central
+cylindrical projection. Using the location at which this imagery was taken, we
+then assemble a data processing pipeline to find their associated satellite
+imagery and DEM data, as well as project it to a simulated camera view.
 
-We take cues from CrossViewDiff \cite{li2024crossviewdiff} and utilize a ControlNet addition to Stable Diffusion 2.1, and utilize a ground view reprojection of the data as our prior, similar to \citeauthor{lu2020geometryaware} \cite{lu2020geometryaware}.
+We take cues from CrossViewDiff \cite{li2024crossviewdiff} and utilize a
+ControlNet addition to Stable Diffusion 2.1, and utilize a ground view
+reprojection of the data as our prior, similar to
+\citeauthor{lu2020geometryaware} \cite{lu2020geometryaware}.
 
 Our contributions are as follows:
 
@@ -25,4 +34,5 @@ Our contributions are as follows:
     \item We evaluate our pipeline on a wide variety of metrics against a simple mean baseline.
 \end{itemize}
 
-We evaluate our method on a test split of the dataset on SD, PSNR, SSIM, FID, and KID.
+We evaluate our method on a test split of the dataset on SD, PSNR, SSIM, FID,
+and KID.
