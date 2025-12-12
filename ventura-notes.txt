@@ -1,0 +1,61 @@
+Questions from Austin:
+why not use more satellite / DEM imagery to create the ground view in Blender?
+adding time-of-day information
+would be nice to have any kind of baseline comparison (other than the mean)
+
+Questions from Fahim:
+~~How could rover masking be done? What would be used to replace the missing pixels?~~
+What are the potential applications?
+
+Questions/notes from me:
+Re: masking — you can downscale the mask to the size of the latents to mask the loss during training on latent space
+What does “mean baseline” image look like?
+!! Would be nice to see conditioning image in the results too
+!!Would be good to see multiple generations for each example.
+!!How many images are the dataset? how many could we possibly obtain? (mentioned that it is 1000 but I'm not sure this is listed in the thesis document itself)
+What other strategies could be good other than ControlNet?Questions from the audience:
+What was difficult / time-consuming?
+What would be better metrics to use? something task-specific? what are the envisioned applications?
+What’s the resolution of the satellite imagery? what can you see in the satellite imagery?
+What would be the most promising direction for future work?
+
+Some notes on the thesis:
+thesis notes:
+
+- [X] Correct Fahim's name in list
+- [X] Correct my name in acknowledgments (thanks for your kind note there)
+- [X] (WIP) in general need to run spell check
+- [X] Page 4: liine -> line
+- [X] Page 5 and everywhere: sattelite -> satellite
+- [X] Page 5: why not use h for height and w for width?
+- [X] Page 7 and elsewhere Mars is not capitalized — is that on purpose?
+- [X] Global Localization shouldn’t be captialized on page 7.
+- [X] roll out -> rollout
+- [X] Cylnidrical projection equations (2.1 and 2.2) look a bit strange. Do you have a reference for it? Why are we multipling theta by 2pi ? Shouldn’t we divide by 2pi instead of multiply? See my attached PDF.
+- [X] Page 8 Shi, Campbell, Yu, and Li -> Shi et al.
+- [X] Figure 3.1 controlnet -> ControlNet
+- [X] Chapter 3 this is pretty brief and it is not clear about how the related
+work connects to your work. Would be nice to have the figures as you showed in
+the presentation. How did the literature search inform your design choices? Why
+did you choose to use SD + ControlNet and not something else?
+- [X] Equations 4.1 and 4.2 — these were confusing. What are R and S? You are basically stretching the image horizontally and vertically — it doesn’t seem to be the appropriate transformation. Could you explain more how you derived this? Where to theta min/max and phi min/max come from?
+dem -> DEM
+- [ ] Section 4.3 “preliminary testing” -> do you have these results?  Can you show them?
+Do figures 4.2 and 4.3 show the same area? are they supposed to correspond?
+Figure 4.5 is the only place where we see a prior image and a ground image
+side-by-side. It would be nice to have a lot more examples of this and larger so
+that we can really see how good the correspondence is. Since the location is not
+precise, it seems that perhaps the prior image does not correspond well to the
+ground image? This presumably will hinder the model from learning to accurately
+produce the ground image from the prior image?
+- [X?] Page 26 missing reference
+- [X] Section 5.4 “inelegant splitting” this issue has been resolved?
+- [X] Perseverance -> Perserverance
+- [ ] Section 5.5 why is the second limitation considered more minor? This
+limitation wasn’t clearly described and I think it could use more discussion
+
+- [-] I think overall you could use more discussion of limitations. Were the
+super-saturated colors discussed anywhere? Did you try to resolve that by
+clipping to 0-1?
+- [ ] You should expand future work as mentioned above and include discussion of
+making a more complete ground image (edited)

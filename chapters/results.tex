@@ -157,7 +157,14 @@ masking only applied to the ground truth imagery as outlined in
 section~\ref{sec:loss-masking} as target masking, and the model with joint
 masking as outlined in section~\ref{sec:mut-masking} as full masking. We also
 include a baseline for a model that always predicts the mean of the ground
-imagery in the training set.
+imagery in the training set. This mean ground imagery is shown in \cref{fig:mean-test-image}.
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{mean_test_image.jpg}
+    \caption{Mean test image used as a baseline to compare our models against.
+    This is the mean of the ground truth pixel data in the training set.}
+    \label{fig:mean-test-image}
+\end{figure}
 
 First we evaluate the models based on the full imagery output as compared with
 the ground truth imagery. This serves for the purposes of completeness and
@@ -264,14 +271,13 @@ in figure~\ref{fig:no-mask-bad}.
 
 \begin{figure}
 
-\begin{tabular}{cc}
-    \includegraphics[width=0.45\linewidth]{ground_true/N_LRGB_0533XRZS_0261222_CYL_L_AUTOGENJ01.jpg}
-    &
-    \includegraphics[width=0.45\linewidth]{no_mask_assembled/N_LRGB_0533XRZS_0261222_CYL_L_AUTOGENJ01.jpg}
-    \\
-    \includegraphics[width=0.45\linewidth]{ground_true/N_LRGB_0627XRZS_0301172_CYL_L_AUTOGENJ02.jpg}
-    &
-    \includegraphics[width=0.45\linewidth]{no_mask_assembled/N_LRGB_0627XRZS_0301172_CYL_L_AUTOGENJ02.jpg}
+\begin{tabular}{c c c}
+    \includegraphics[width=0.33\linewidth]{vis/N_LRGB_0533XRZS_0261222_CYL_L_AUTOGENJ01.jpg} &
+    \includegraphics[width=0.33\linewidth]{ground_true/N_LRGB_0533XRZS_0261222_CYL_L_AUTOGENJ01.jpg} &
+    \includegraphics[width=0.33\linewidth]{no_mask_assembled/N_LRGB_0533XRZS_0261222_CYL_L_AUTOGENJ01.jpg} \\
+    \includegraphics[width=0.33\linewidth]{vis/N_LRGB_0627XRZS_0301172_CYL_L_AUTOGENJ02.jpg} &
+    \includegraphics[width=0.33\linewidth]{ground_true/N_LRGB_0627XRZS_0301172_CYL_L_AUTOGENJ02.jpg} &
+    \includegraphics[width=0.33\linewidth]{no_mask_assembled/N_LRGB_0627XRZS_0301172_CYL_L_AUTOGENJ02.jpg}
 \end{tabular}
 
 \caption{Cases where the no mask model performs well, the contours of the geometry are well-replicated.}
@@ -281,14 +287,13 @@ in figure~\ref{fig:no-mask-bad}.
 
 \begin{figure}
 
-\begin{tabular}{cc}
-    \includegraphics[width=0.45\linewidth]{ground_true/N_LRGB_1066_RZS_0501534_CYL_L_AUTOGENJ04.jpg}
-    &
-    \includegraphics[width=0.45\linewidth]{no_mask_assembled/N_LRGB_1066_RZS_0501534_CYL_L_AUTOGENJ04.jpg}
-    \\
-    \includegraphics[width=0.45\linewidth]{ground_true/N_LRGB_1312XRZS_0611928_CYL_L_AUTOGENJ03.jpg}
-    &
-    \includegraphics[width=0.45\linewidth]{no_mask_assembled/N_LRGB_1312XRZS_0611928_CYL_L_AUTOGENJ03.jpg}
+\begin{tabular}{c c c}
+    \includegraphics[width=0.33\linewidth]{vis/N_LRGB_1066_RZS_0501534_CYL_L_AUTOGENJ04.jpg} &
+    \includegraphics[width=0.33\linewidth]{ground_true/N_LRGB_1066_RZS_0501534_CYL_L_AUTOGENJ04.jpg} &
+    \includegraphics[width=0.33\linewidth]{no_mask_assembled/N_LRGB_1066_RZS_0501534_CYL_L_AUTOGENJ04.jpg} \\
+    \includegraphics[width=0.33\linewidth]{vis/N_LRGB_1312XRZS_0611928_CYL_L_AUTOGENJ03.jpg} &
+    \includegraphics[width=0.33\linewidth]{ground_true/N_LRGB_1312XRZS_0611928_CYL_L_AUTOGENJ03.jpg} &
+    \includegraphics[width=0.33\linewidth]{no_mask_assembled/N_LRGB_1312XRZS_0611928_CYL_L_AUTOGENJ03.jpg}
 \end{tabular}
 
 \caption{Cases where the no mask model performs poorly, the close up contours of the geometry are not replicated, as well as hallucinated textures that are not consistent with the original imagery.}
@@ -298,8 +303,32 @@ in figure~\ref{fig:no-mask-bad}.
 
 \section{Limitations}
 
-Due to issues inherent to the data, this work has a couple of limitations that should be taken into consideration.
+Due to issues inherent to the data, this work has a couple of limitations that
+should be taken into consideration as to the generalization and quality of our
+results.
 
-First, the data contains multiple images from similar or sometimes even the exact same location. While having multiples of these images is still useful for training and reconstruction, it presents issues when generating the train and test splits. Specifically, there can effectively be data leakage (due to very similar ground imagery) between the train and test splits when simple random sampling is used. Since this issue was only discovered after model training, this issue has not been mitigated in this work, but could be for future work.
+First, the data contains multiple images from similar or sometimes even the
+exact same location. While having multiples of these images is still useful for
+training and reconstruction, it presents issues when generating the train and
+test splits. Specifically, there can effectively be data leakage (due to very
+similar ground imagery) between the train and test splits when simple random
+sampling is used. Since this issue was only discovered after model training,
+this issue has not been mitigated in this work, but could be for future work.
 
-Second, and more minor, is that because the mosaics are assembled at a different time than the actual imagery is taken, there is the potential for difference between the location at which the image mosaic was assembled.
+Second, is that because the mosaics are assembled at a different time than the
+actual imagery is taken, there is the potential for difference between the
+location at which the image mosaic was assembled. While this sounds like a major
+issue at first blush, it should be noted that this is actually quite minor. Due
+to the slow speed of the rover, even rather substantial differences in time are
+likely to be quite close in terms of the satellite view.
+
+Lastly, the satellite imagery can, and often does, overlap significantly due to
+the rover's slow speed. While we did attempt to account for this by adjusting
+the limiting size of the satellite patches, there is no perfect solution to this
+problem. As a result, this is another factor that may have lead to spurious
+correlation between the train and test sets, as well as within the dataset
+itself.
+
+As a result of these limitations, while measures have been taken to attempt to
+allow the results to be generalized to other regions of mars, the effectiveness
+of such is unknown at this time.

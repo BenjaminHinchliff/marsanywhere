@@ -1,34 +1,55 @@
 \chapter{Related Work} \label{sec:related_work}
 
-\section{Aerial Ground Co-location/Geolocation}
+MarsAnywhere began as research into localization techniques on mars, following
+in the footsteps of the prior work on Global localization at NASA JPL
+\cite{verma2024globalloco}. This later evolved into researching the closely
+related problem of satellite-to-ground synthesis. As such, research in both
+fields have heavily influenced this work.
 
-A closely related field of research is that of cross view geo-localization,
-specifically, aerial ground co-location, which consists of localizing ground
-imagery based on corresponding aerial imagery. This has extensive application
-varying from self-driving cars to robotics.
+\section{Aerial Ground Co-location/Geolocalization}
+
+Aerial ground co-location, aka geolocalization consists of localizing the
+position of a ground vehicle based on ground imagery by finding its
+corresponding aerial imagery. This has extensive application varying from
+self-driving cars to robotics.
 
 The state of the art consists of many different approaches varying from
 traditional feature matching techniques \cite{castaldo2015featurematching} to
 ground to aerial synthesis with feature matching \cite{regmi2019g2amatching}.
 
-Notable to this work, similar techniques have also been applied on mars with the
+Notable to this work, similar techniques have also been applied on Mars with the
 roll out of Global Localization techniques for Perseverance rover operation,
 utilizing the aerial view projected orthomoasics and template matching
-\cite{verma2024globalloco}.
+\cref{fig:related-globalloco} \cite{verma2024globalloco}. We take cues from this
+work, using a similar projection technique in the opposite direction to use a
+ground projected view as the prior for our imagery.
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{figures/related-nasa.jpg}
+    \caption{Figure from \citeauthor{verma2024globalloco}
+    \cite{verma2024globalloco} showing their approach to global localization
+    utilizing the aerially projected rover orthomosaic matched against the true
+    orbital map using a modified census transform. We take cues from this work
+    by utilizing a ground projected view for our prior.}
+
+    \label{fig:related-globalloco}
+\end{figure}
 
 \section{Satellite-to-street View Synthesis}
 
-Satellite to street view synthesis for Earth imagery is a well-studied problem,
+Satellite-to-street view synthesis for Earth imagery is a well-studied problem,
 with a focus on applications to urban areas, as these tend to be the most
-difficult. With sufficiently large dataset, direct image to image translation
-can produce decent results, however on earth the additional complexity of the
-imagery can create a number of issues. For example, if the model lacks an
-understanding of the different types of structures in the imagery, it can
-misidentify them and then subsequently mispredict them in the imagery. For
-example, misunderstanding a helipad as a road or the like. To help mitigate
-these issues, it's common to introduce additional semantic information to
-attempt to categorize the different types of terrain, such as grass, road,
-trees, which helps improve model performance \cite{zhai2017groundlayout,
+difficult. Functionally, this is the same problem addressed as with our work
+with very different data. With sufficiently large dataset, direct image to image
+translation can produce decent results, however on earth the additional
+complexity of the imagery can create a number of issues. For example, if the
+model lacks an understanding of the different types of structures in the
+imagery, it can misidentify them and then subsequently mispredict them in the
+imagery. For example, misunderstanding a helipad as a road or the like. To help
+mitigate these issues, it's common to introduce additional semantic information
+to attempt to categorize the different types of terrain, such as grass, road,
+trees, which helps improve model performance as in
+\cref{fig:related-selectiongan} \cite{zhai2017groundlayout,
 tang2019selectiongan}.
 
 Another common avenue of research is to focus on various reprojection
@@ -38,14 +59,29 @@ reprojection techniques such as in the work of
 \citeauthor{shi2022geopanoramasynth} where a learnable reprojection module is
 used to relate the satellite and ground views \cite{shi2022geopanoramasynth}.
 
+\begin{figure}
+    \includegraphics[width=\linewidth]{related-selectiongan.jpg}
+    \caption{Figure from \citeauthor{tang2019selectiongan}
+    \cite{tang2019selectiongan} showing the utilization for semantic
+    segmentation to guide the synthesis of imagery between either the
+    ground-to-aerial path, as in row 1, or the aerial-to-ground path, as in row
+    2.}
+    \label{fig:related-selectiongan}
+\end{figure}
+
 \section{Diffusion Models}
 
-Diffusion models create a model that is trained to progressively denoise images
-by artificially adding progressively worse noise during training. After
-training, random noise can be fed into the model and the model will
-progressively remove the noise and in the process almost replicate an image that
-aligns with its training data. This process can be conditioned towards specific
-outcomes using conditioning in the form of mechanisms like cross-attention
+Our work utilizes a diffusion based model for synthesis called Stable Diffusion.
+This was chosen for their high quality generation as well as training stability
+compared to GANs, while still remaining practical for our hardware limitations
+as opposed to fine-tuning cutting-edge transformer based models.
+
+Diffusion models are a model that is trained to progressively denoise images by
+artificially adding progressively worse noise during training. After training,
+random noise can be fed into the model and the model will progressively remove
+the noise and in the process almost replicate an image that aligns with its
+training data. This process can be conditioned towards specific outcomes using
+conditioning in the form of mechanisms like cross-attention
 \cite{Diffusion_Ho2020}.
 
 In the context of cross-view synthesis, a more complex version of the technique
@@ -58,9 +94,10 @@ diffusion model.
 
 \section{ControlNet}
 
-ControlNets are a technique to allow for fine-tuning an existing model to be
-conditioned using new inputs, without permanently modifying the original model
-and with far less compute than training the entire model. This is done by
+ControlNets are a technique to allow for fine-tuning an existing diffusion model
+to be conditioned using new inputs, without permanently modifying the original
+model and with far less compute than training the entire model. This allowed for
+the fine-tuning with reasonable speed on our hardware. This is done by
 creating a trainable copy of the downward convolutional layers in the U-Net
 backbone which are then added back into the model progressively through zero
 convolution layers, as shown in figure~\ref{fig:controlnet-arch}

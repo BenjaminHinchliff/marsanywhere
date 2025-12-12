@@ -36,6 +36,16 @@ results. Unfortunately, due to the rovers varying colors and textures, it has
 thus far been difficult to mask out without the ability to utilize depth
 information.
 
+\section{Far-field Priors}
+
+Currently, to limit the spurious correlation between satellite images within the
+dataset (and by extension their associated ground imagery) as well as technical
+limitations, we have quite small satellite patches and therefore the ground
+views don't contain any prior far-field information, meaning that far off
+terrain isn't necessarily correlated with ground truth in our results. Future
+work, ideally incorporating a more diverse dataset to limit the correlation
+issues, may want to address this issue.
+
 \section{Full 3D Reconstruction and Rendering}
 
 With the advent and popularization of NeRFs and 3D Gaussian Splatting, it may be
