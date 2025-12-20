@@ -109,11 +109,16 @@ just under 300 m diameter.
 
 \section{Ground View Reprojection}
 
-Preliminary testing found that a Controlnet based model performed poorly on
-sattelite/dem imagery alone. We believe this is likely because the U-Net
-architecture used by Stable Diffusion 2.1 struggles to encode the quite complex
-non-linear perspective shifts in the data, and as such struggles to converge into
-a useful result. This is consistent with the work of
+Models trained using only the overhead satellite view as the prior were found to
+be able to create realistic looking results, but often struggled to reconstruct
+terrain accurately. This is reflected in our quantitative evaluation of these
+models in \cref{sec:results} as well as the outputs in
+appendix~\ref{sec:full-test-results}.
+
+We believe this is likely because the U-Net architecture used in the diffusion
+backbone of Stable Diffusion 2.1 struggles to encode the quite complex
+non-linear perspective shifts in the data, and as such struggles to converge
+into a useful result. This is consistent with the work of
 \citeauthor{li2024crossviewdiff}, where they chose to use a ground view sky mask
 to guide the diffusion process \cite{li2024crossviewdiff}. We do not have access
 to sky mask data, and don't want to use it as a prior, so chose to instead use a
@@ -131,7 +136,7 @@ empirical testing, we found that a displacement strength of 0.1 and a camera
 height of 0.25 units produced results reasonably consistent with the ground view
 imagery.
 
-The full data processing pipeline is visualized in figure~\ref{fig:data-pipeline}.
+The full data processing pipeline is visualized in \cref{fig:data-pipeline}.
 
 \begin{figure}
 
@@ -179,7 +184,7 @@ were used for the model.
 
 A factor that adds additional complexity is that panoramic mosaics that serve as
 ground truth imagery can have missing data, and in fact do in almost all cases.
-For instance, in figure~\ref{fig:missing-data}, the blacked out regions indicate
+For instance, in \cref{fig:missing-data}, the blacked out regions indicate
 a lack of data, not true colors of the image. This is obvious to our eyes, but
 less so to a machine learning model, leading it to reproduce these artifacts in
 its output. This is undesirable, and so we compensate for it by masking the
@@ -187,7 +192,7 @@ predicted image such that the model loss is only computed between the section of
 imagery that is truly present in the imagery. This is done by thresholding for
 non-black pixels to create a ground image mask. This mask is the applied to the
 predicted imagery, and the loss is then subsequently calculated between the
-imagery as per normal, as shown in figure~\ref{fig:gt-masking-ex}.
+imagery as per normal, as shown in \cref{fig:gt-masking-ex}.
 
 \begin{figure}
 \includegraphics[width=\linewidth]{N_LRGB_1252_RZS_0590000_CYL_L_AUTOGENJ03.png}
@@ -219,7 +224,7 @@ given that caveat.
 
 This was done by taking the bitwise and of a mask of both the ground and prior
 imagery, then applying that to the predicted imagery and the ground imagery for
-loss calculation, as shown in figure~\ref{fig:mi-masking-ex}.
+loss calculation, as shown in \cref{fig:mi-masking-ex}.
 
 \begin{figure}
 

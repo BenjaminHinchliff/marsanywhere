@@ -45,7 +45,7 @@ translation can produce decent results, however on earth the additional
 complexity of the imagery can create a number of issues. For example, if the
 model lacks an understanding of the different types of structures in the
 imagery, it can misidentify them and then subsequently mispredict them in the
-imagery. For example, misunderstanding a helipad as a road or the like. To help
+imagery. For example, misunderstanding a helipad as a road. To help
 mitigate these issues, it's common to introduce additional semantic information
 to attempt to categorize the different types of terrain, such as grass, road,
 trees, which helps improve model performance as in
@@ -100,7 +100,7 @@ model and with far less compute than training the entire model. This allowed for
 the fine-tuning with reasonable speed on our hardware. This is done by
 creating a trainable copy of the downward convolutional layers in the U-Net
 backbone which are then added back into the model progressively through zero
-convolution layers, as shown in figure~\ref{fig:controlnet-arch}
+convolution layers, as shown in \cref{fig:controlnet-arch}
 \cite{ControlNet_Zhang2023}.
 
 \begin{figure}

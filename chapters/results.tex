@@ -150,23 +150,33 @@ where in our work:
 
 \section{Experimental Setting}
 
-We evaluate the models outlined in sections \ref{sec:controlnet-model} on the
-test split in three different levels of masking for comparing the difference
-between the imagery. For the purposes of evaluation we refer to the model with
-masking only applied to the ground truth imagery as outlined in
-section~\ref{sec:loss-masking} as target masking, and the model with joint
-masking as outlined in section~\ref{sec:mut-masking} as full masking. We also
-include a baseline for a model that always predicts the mean of the ground
-imagery in the training set. This mean ground imagery is shown in \cref{fig:mean-test-image}.
+We evaluate the models three different models on the test split in three
+different levels of masking for comparing the difference between the imagery.
+
+First, we test a basic ControlNet model trained with the raw satellite patch
+(\textit{without} being projected to a ground view) as the prior, which we refer
+to as no projection.
+
+After this, we test our models based on a prior projected to a ground view as
+outlined in \cref{fig:data-pipeline}. We evaluate a model with masking only
+applied to the conditioning imagery based on to the ground truth imagery as
+outlined in section~\ref{sec:loss-masking}, referred to as ground masking.
+Lastly, we evaluate the model with masking as outlined in
+section~\ref{sec:mut-masking}, referred to as joint masking.
+
+We also include a baseline for a model that always predicts the mean of the
+ground imagery in the training set. This mean ground imagery is shown in
+\cref{fig:mean-test-image} and is referred to as the mean baseline.
 
 \begin{figure}
     \includegraphics[width=\linewidth]{mean_test_image.jpg}
     \caption{Mean test image used as a baseline to compare our models against.
-    This is the mean of the ground truth pixel data in the training set.}
+    This is the channel-wise mean of the ground truth pixel data in the training set.}
     \label{fig:mean-test-image}
 \end{figure}
 
-First we evaluate the models based on the full imagery output as compared with
+For the evaluation itself, we evaluate with 3 different masking configurations.
+First, we evaluate the models based on the full imagery output as compared with
 the ground truth imagery. This serves for the purposes of completeness and
 demonstrating that masking does not unduly bias the results. However, it is of
 limited usefulness as the results are heavily biased by differences between the
@@ -192,29 +202,44 @@ differences to the values themselves, didn't change the general trends of
 results.
 
 Models trained using both methods of masking struggled to compete against the
-baseline on our more traditional (not-learning based) metrics. This is an
-unfortunate, but not unsurprising result. These more traditional metrics have
-little understanding of true photorealism, and rather focus on the absolute
-difference between the output image and the ground truth imagery. In addition of
-the instability inherent to diffusion model generation, as well as artifacts
-present in the training data, the diffusion model at times struggled to
-reconstruct the desired aspects of the data.
+baseline on our more traditional (not-learning based) metrics, as seen in
+\cref{tab:unmasked,tab:gt-masked,tab:cond-masked}. This is an unfortunate, but
+not unsurprising result. These more traditional metrics have littl1
+understanding of true photorealism, and rather focus on the absolute difference
+between the output image and the ground truth imagery. In addition of the
+instability inherent to diffusion model generation, as well as artifacts present
+in the training data, the diffusion model at times struggled to reconstruct the
+desired aspects of the data. However, our techniques at times came close to
+competing with this prior. For instance, in \cref{tab:cond-masked} , ground
+masking came within 0.5 dB of the mean baseline. We believe this gap may be able
+to be narrowed with more data.
 
 However, on metrics with a greater focus on quantifying higher-level differences
-between imagery, our models perform much better than the baseline. Namely, the
-FID and KID of our models represent an order of magnitude improvement over our
-na\"ive baseline. This is likely because these metrics focus on the how the
-distribution of higher level features (as extracted by classifier networks)
-compare, on which our models can be visually seen to perform well at producing
-imagery resembling that of Mars.
+between imagery, as seen in \cref{tab:unmasked,tab:gt-masked,tab:cond-masked},
+our models perform much better than the baseline. Namely, the FID and KID of our
+models represent an order of magnitude improvement over our na\"ive baseline.
+This is likely because these metrics focus on the how the distribution of higher
+level features (as extracted by classifier networks) compare, on which our
+models can be visually seen to perform well at producing imagery resembling that
+of Mars.
+
+We were pleased to see that the reprojection of the imagery improved the quality
+of results not just qualitatively, but quantitatively as well. For instance in
+\cref{tab:gt-masked} the reprojected model utilizing ground masking performed a
+bit better on all metrics as compared with the no reprojection model. This trend
+holds in both \cref{tab:unmasked,tab:cond-masked}. This strongly indicates that
+reprojecting the aerial view imagery to a simulated ground view improved the
+quality of our results.
 
 Lastly, our experiments with full masking have yielded mixed results. While it,
-unsurprisingly, performs worse in the full scope evaluation of tables
-\ref{tab:unmasked} and \ref{tab:gt-masked}, we were surprised to see that even
-in the fully masked evaluation shown in table \ref{tab:cond-masked}, it did not
-show universally better performance. It performed marginally better on SD and
-KID, but marginally worse on PSNR, SSIM, and FID. We believe this might have
-been due to similar issues with over fitting on artifacts in the data.
+unsurprisingly, performs worse in the full scope evaluation of
+\cref{tab:unmasked,tab:gt-masked}, we were surprised to see that even
+in the fully masked evaluation shown in \cref{tab:cond-masked}, it did not
+show better performance. We believe that this may haver been due to
+correspondence between the conditioning and ground truth imagery, while it is
+good, tends to have a slight vertical translation offset. This means that
+relevant sections of the ground truth data may have been excluded during
+training.
 
 \begin{table}
 
@@ -251,27 +276,25 @@ present in \textbf{both} the projected conditioning imagery and masked ground im
 
 \section{Qualitative Evaluation}
 
-While the initial results are promising, our model exhibits a number of
-artifacts that degrade the geometrical accuracy and photorealism of the image.
+While the results are generally impressive, they all contain the major known
+artifact is that the model attempts to reconstruct the Perseverance rover within
+the imagery. This fact alone may have been why full image masking was met with
+limited success, as the rover often occluded the overlapping portion of the
+image. This leads the model to predict the rover more often than not, which is
+not our goal in producing the imagery. Other minor artifacts such as attempting
+replicate stitch lines between images are also present.
 
-A major known artifact is that the model attempts to reconstruct the
-Perseverance rover within the imagery. This fact alone may have been why full
-image masking was met with limited success, as the rover often occluded the
-overlapping portion of the image. This leads the model to predict the rover more
-often than not, which is not our goal in producing the imagery. This is then
-exacerbated by the image split issues, causing the rover to occlude almost all
-of the image in many of the fully masked cases.
-
-In cases where the model does predict terrain though, it often performs quite
-well. For instance, in prediction of 0533 and 0627, it was able to accurately
-infer the shape of terrain and reconstruct it, as shown in
-figure~\ref{fig:no-mask-good}. However, in other cases, it struggles to
-reproduce the large scale features or hallucinate non-existent textures, such as
-in figure~\ref{fig:no-mask-bad}.
+Consistent with our goals for this work, our model appears to demonstrate some
+knowledge of reconstructing from the terrain in the prior, as shown in
+\cref{fig:no-mask-good}. In other cases where it struggles it can be seen to
+"misunderstand" specific terrain and textures and struggle to reconstruct it,
+but still produces impressive results, as shown in \cref{fig:no-mask-bad}. Full
+test results can be found in appendix~\ref{sec:full-test-results}.
 
 \begin{figure}
 
 \begin{tabular}{c c c}
+    Conditioning Image & Ground Truth & No Mask Model Result \\
     \includegraphics[width=0.33\linewidth]{vis/N_LRGB_0533XRZS_0261222_CYL_L_AUTOGENJ01.jpg} &
     \includegraphics[width=0.33\linewidth]{ground_true/N_LRGB_0533XRZS_0261222_CYL_L_AUTOGENJ01.jpg} &
     \includegraphics[width=0.33\linewidth]{no_mask_assembled/N_LRGB_0533XRZS_0261222_CYL_L_AUTOGENJ01.jpg} \\
@@ -280,7 +303,9 @@ in figure~\ref{fig:no-mask-bad}.
     \includegraphics[width=0.33\linewidth]{no_mask_assembled/N_LRGB_0627XRZS_0301172_CYL_L_AUTOGENJ02.jpg}
 \end{tabular}
 
-\caption{Cases where the no mask model performs well, the contours of the geometry are well-replicated.}
+\caption{Example cases where the no mask model performs well, successfully replicating
+both the ground shape contours (as can be seen with the mounds on the left and
+right), and the general texture of the ground. Specific rocks however, were not synthesized accurately.}
 \label{fig:no-mask-good}
 
 \end{figure}
@@ -288,15 +313,19 @@ in figure~\ref{fig:no-mask-bad}.
 \begin{figure}
 
 \begin{tabular}{c c c}
-    \includegraphics[width=0.33\linewidth]{vis/N_LRGB_1066_RZS_0501534_CYL_L_AUTOGENJ04.jpg} &
-    \includegraphics[width=0.33\linewidth]{ground_true/N_LRGB_1066_RZS_0501534_CYL_L_AUTOGENJ04.jpg} &
-    \includegraphics[width=0.33\linewidth]{no_mask_assembled/N_LRGB_1066_RZS_0501534_CYL_L_AUTOGENJ04.jpg} \\
-    \includegraphics[width=0.33\linewidth]{vis/N_LRGB_1312XRZS_0611928_CYL_L_AUTOGENJ03.jpg} &
-    \includegraphics[width=0.33\linewidth]{ground_true/N_LRGB_1312XRZS_0611928_CYL_L_AUTOGENJ03.jpg} &
-    \includegraphics[width=0.33\linewidth]{no_mask_assembled/N_LRGB_1312XRZS_0611928_CYL_L_AUTOGENJ03.jpg}
+    Conditioning Image & Ground Truth & No Mask Model Result \\
+    \includegraphics[width=0.33\linewidth]{vis/N_LRGB_1114_RZS_0512990_CYL_L_AUTOGENJ01.jpg} &
+    \includegraphics[width=0.33\linewidth]{ground_true/N_LRGB_1114_RZS_0512990_CYL_L_AUTOGENJ01.jpg} &
+    \includegraphics[width=0.33\linewidth]{no_mask_assembled/N_LRGB_1114_RZS_0512990_CYL_L_AUTOGENJ01.jpg} \\
+    \includegraphics[width=0.33\linewidth]{vis/N_LRGB_1177_RZS_0540000_CYL_L_AUTOGENJ02.jpg} &
+    \includegraphics[width=0.33\linewidth]{ground_true/N_LRGB_1177_RZS_0540000_CYL_L_AUTOGENJ02.jpg} &
+    \includegraphics[width=0.33\linewidth]{no_mask_assembled/N_LRGB_1177_RZS_0540000_CYL_L_AUTOGENJ02.jpg}
 \end{tabular}
 
-\caption{Cases where the no mask model performs poorly, the close up contours of the geometry are not replicated, as well as hallucinated textures that are not consistent with the original imagery.}
+\caption{Example cases where the no mask model struggled with synthesis. In the first
+row, the model misunderstood the left ridge from and failed to accurately
+reconstruct it in the imagery. In the second row, the model failed to accurately
+synthesize the ground texture accurately}
 \label{fig:no-mask-bad}
 
 \end{figure}
@@ -330,5 +359,5 @@ correlation between the train and test sets, as well as within the dataset
 itself.
 
 As a result of these limitations, while measures have been taken to attempt to
-allow the results to be generalized to other regions of mars, the effectiveness
-of such is unknown at this time.
+allow the results to be generalized to other regions of mars, the degree to
+which the model can be generalized has yet to be tested.

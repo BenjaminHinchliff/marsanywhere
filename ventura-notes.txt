@@ -40,8 +40,8 @@ the presentation. How did the literature search inform your design choices? Why
 did you choose to use SD + ControlNet and not something else?
 - [X] Equations 4.1 and 4.2 — these were confusing. What are R and S? You are basically stretching the image horizontally and vertically — it doesn’t seem to be the appropriate transformation. Could you explain more how you derived this? Where to theta min/max and phi min/max come from?
 dem -> DEM
-- [ ] Section 4.3 “preliminary testing” -> do you have these results?  Can you show them?
-Do figures 4.2 and 4.3 show the same area? are they supposed to correspond?
+- [X] Section 4.3 “preliminary testing” -> do you have these results?  Can you show them?
+- [-] Do figures 4.2 and 4.3 show the same area? are they supposed to correspond?
 Figure 4.5 is the only place where we see a prior image and a ground image
 side-by-side. It would be nice to have a lot more examples of this and larger so
 that we can really see how good the correspondence is. Since the location is not
@@ -51,11 +51,11 @@ produce the ground image from the prior image?
 - [X?] Page 26 missing reference
 - [X] Section 5.4 “inelegant splitting” this issue has been resolved?
 - [X] Perseverance -> Perserverance
-- [ ] Section 5.5 why is the second limitation considered more minor? This
+- [X] Section 5.5 why is the second limitation considered more minor? This
 limitation wasn’t clearly described and I think it could use more discussion
 
 - [-] I think overall you could use more discussion of limitations. Were the
 super-saturated colors discussed anywhere? Did you try to resolve that by
 clipping to 0-1?
-- [ ] You should expand future work as mentioned above and include discussion of
+- [X] You should expand future work as mentioned above and include discussion of
 making a more complete ground image (edited)

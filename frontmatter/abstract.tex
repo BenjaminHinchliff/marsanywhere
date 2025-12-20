@@ -7,11 +7,11 @@ have yet to be applied to the domain due to difficulties in collating and
 processing the data into a usable form. We address this deficiency by creating a
 dataset consisting of ground view panorama imagery from the Perseverance rover,
 along with associated satellite view imagery and DEM data from HiRISE collected
-for Perseverance mission planning. We then apply a controlnet on stable
-diffusion 2.1 to the image data projected into the rover view. We also apply
+for Perseverance mission planning. We then apply a ControlNet based on Stable
+Diffusion 2.1 to the image data projected into the rover view. We also apply
 loss masking based on the conditioning image to help the model build
 associations between the project view and the target imagery. We compare these
-results on standard image reconstruction metrics to a mean baseline SSIM=0.6011,
-FID=166.00, KID=0.09328. Our work lays the foundation for future developments in
+results on standard image reconstruction metrics to a mean baseline, SSIM=0.6035,
+FID=98.65, KID=0.02834. Our work lays the foundation for future developments in
 the area, targeting applications to education and rover planning. Source
 available at \url{https://github.com/BenjaminHinchliff}.
