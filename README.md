@@ -18,4 +18,4 @@ associations between the project view and the target imagery. We compare these
 results on standard image reconstruction metrics to a mean baseline, SSIM=0.6035,
 FID=98.65, KID=0.02834. Our work lays the foundation for future developments in
 the area, targeting applications to education and rover planning. Source
-available at \url{https://github.com/BenjaminHinchliff}.
+available at https://github.com/BenjaminHinchliff.
